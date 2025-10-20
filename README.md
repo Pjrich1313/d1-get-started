@@ -1,10 +1,10 @@
-# My Cool Project
+# pamela
 
 A Cloudflare Workers project using D1 database.
 
 ## Getting Started
 
-This is My Cool Project, a starter template for working with Cloudflare D1.
+This is pamela, a starter template for working with Cloudflare D1.
 
 ### Prerequisites
 
@@ -30,6 +30,6 @@ npm run dev
 npm run deploy
 ```
 
-## About My Cool Project
+## About pamela
 
-My Cool Project demonstrates the basics of working with Cloudflare D1 database in a Workers environment.
+pamela demonstrates the basics of working with Cloudflare D1 database in a Workers environment.
