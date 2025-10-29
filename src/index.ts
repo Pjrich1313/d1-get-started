@@ -1,3 +1,5 @@
+import { getProjectName, applyProjectNameGuard } from './config';
+
 export default {
   async fetch(request, env): Promise<Response> {
     const { pathname } = new URL(request.url);
@@ -12,8 +14,14 @@ export default {
       return Response.json(results);
     }
 
-    return new Response(
-      "Call /api/beverages to see everyone who works at Bs Beverages"
+    if (pathname === "/api/project-name") {
+      return Response.json({ projectName: getProjectName() });
+    }
+
+    const welcomeMessage = applyProjectNameGuard(
+      "Welcome to My Cool Project! Call /api/beverages to see everyone who works at Bs Beverages, or /api/project-name to see the current project name."
     );
+
+    return new Response(welcomeMessage);
   },
 } satisfies ExportedHandler<Env>;
