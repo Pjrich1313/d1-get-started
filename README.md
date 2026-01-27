@@ -46,7 +46,7 @@ Returns all customers from "Bs Beverages" company.
 ]
 ```
 
-### GET /api/pull
+### POST /api/pull
 Refreshes the database by re-initializing it with schema data. Useful for resetting the database to its initial state.
 
 **Example Response:**

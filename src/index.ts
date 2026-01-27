@@ -28,7 +28,7 @@ export default {
       }
     }
 
-    if (pathname === "/api/pull") {
+    if (pathname === "/api/pull" && request.method === "POST") {
       try {
         // Re-initialize database with schema data
         await env.DB.exec(`DROP TABLE IF EXISTS Customers`);
@@ -36,10 +36,10 @@ export default {
         
         // Use batch for efficient multiple inserts
         await env.DB.batch([
-          env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(1, 'Alfreds Futterkiste', 'Maria Anders'),
-          env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(4, 'Around the Horn', 'Thomas Hardy'),
-          env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(11, 'Bs Beverages', 'Victoria Ashworth'),
-          env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(13, 'Bs Beverages', 'Random Name')
+          env.DB.prepare(`INSERT INTO Customers (CustomerId, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(1, 'Alfreds Futterkiste', 'Maria Anders'),
+          env.DB.prepare(`INSERT INTO Customers (CustomerId, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(4, 'Around the Horn', 'Thomas Hardy'),
+          env.DB.prepare(`INSERT INTO Customers (CustomerId, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(11, 'Bs Beverages', 'Victoria Ashworth'),
+          env.DB.prepare(`INSERT INTO Customers (CustomerId, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(13, 'Bs Beverages', 'Random Name')
         ]);
         
         return Response.json({
