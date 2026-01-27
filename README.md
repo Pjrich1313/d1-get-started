@@ -30,6 +30,33 @@ npm run dev
 npm run deploy
 ```
 
+## API Endpoints
+
+### GET /api/beverages
+Returns all customers from "Bs Beverages" company.
+
+**Example Response:**
+```json
+[
+  {
+    "CustomerId": 11,
+    "CompanyName": "Bs Beverages",
+    "ContactName": "Victoria Ashworth"
+  }
+]
+```
+
+### GET /api/pull
+Refreshes the database by re-initializing it with schema data. Useful for resetting the database to its initial state.
+
+**Example Response:**
+```json
+{
+  "success": true,
+  "message": "Database refreshed successfully"
+}
+```
+
 ## About pamela
 
 pamela demonstrates the basics of working with Cloudflare D1 database in a Workers environment.

@@ -65,4 +65,27 @@ describe('D1 Beverages Worker', () => {
 		expect(Array.isArray(data)).toBe(true);
 		expect(data.length).toBe(2);
 	});
+
+	it('refreshes database via pull endpoint (unit style)', async () => {
+		const request = new IncomingRequest('http://example.com/api/pull');
+		const ctx = createExecutionContext();
+		const response = await worker.fetch(request, env, ctx);
+		await waitOnExecutionContext(ctx);
+		
+		expect(response.status).toBe(200);
+		
+		const data = await response.json();
+		expect(data).toHaveProperty('success', true);
+		expect(data).toHaveProperty('message', 'Database refreshed successfully');
+	});
+
+	it('refreshes database via pull endpoint (integration style)', async () => {
+		const response = await SELF.fetch('https://example.com/api/pull');
+		
+		expect(response.status).toBe(200);
+		
+		const data = await response.json();
+		expect(data).toHaveProperty('success', true);
+		expect(data).toHaveProperty('message');
+	});
 });
