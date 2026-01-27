@@ -49,6 +49,8 @@ Returns all customers from "Bs Beverages" company.
 ### POST /api/pull
 Refreshes the database by re-initializing it with schema data. Useful for resetting the database to its initial state.
 
+**⚠️ Warning:** This endpoint drops and recreates the database, causing data loss. It is intended for development and testing purposes only. In production environments, this endpoint should be protected with authentication or disabled entirely.
+
 **Example Response:**
 ```json
 {
