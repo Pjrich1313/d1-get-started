@@ -16,10 +16,10 @@ describe('D1 Beverages Worker', () => {
 		
 		// Use batch() for efficient multiple inserts
 		await env.DB.batch([
-			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(1, 'Alfreds Futterkiste', 'Maria Anders'),
-			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(4, 'Around the Horn', 'Thomas Hardy'),
-			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(11, 'Bs Beverages', 'Victoria Ashworth'),
-			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(13, 'Bs Beverages', 'Random Name')
+			env.DB.prepare(`INSERT INTO Customers (CustomerId, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(1, 'Alfreds Futterkiste', 'Maria Anders'),
+			env.DB.prepare(`INSERT INTO Customers (CustomerId, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(4, 'Around the Horn', 'Thomas Hardy'),
+			env.DB.prepare(`INSERT INTO Customers (CustomerId, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(11, 'Bs Beverages', 'Victoria Ashworth'),
+			env.DB.prepare(`INSERT INTO Customers (CustomerId, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(13, 'Bs Beverages', 'Random Name')
 		]);
 	});
 
@@ -64,5 +64,42 @@ describe('D1 Beverages Worker', () => {
 		const data = await response.json();
 		expect(Array.isArray(data)).toBe(true);
 		expect(data.length).toBe(2);
+	});
+
+	it('refreshes database via pull endpoint (unit style)', async () => {
+		const request = new IncomingRequest('http://example.com/api/pull', {
+			method: 'POST'
+		});
+		const ctx = createExecutionContext();
+		const response = await worker.fetch(request, env, ctx);
+		await waitOnExecutionContext(ctx);
+		
+		expect(response.status).toBe(200);
+		
+		const data = await response.json();
+		expect(data).toHaveProperty('success', true);
+		expect(data).toHaveProperty('message', 'Database refreshed successfully');
+		
+		// Verify the database was actually refreshed by querying it
+		const { results } = await env.DB.prepare('SELECT COUNT(*) as count FROM Customers').all();
+		expect(results[0].count).toBe(4);
+	});
+
+	it('refreshes database via pull endpoint (integration style)', async () => {
+		const response = await SELF.fetch('https://example.com/api/pull', {
+			method: 'POST'
+		});
+		
+		expect(response.status).toBe(200);
+		
+		const data = await response.json();
+		expect(data).toHaveProperty('success', true);
+		expect(data).toHaveProperty('message');
+		
+		// Verify the database was refreshed
+		const beverages = await SELF.fetch('https://example.com/api/beverages');
+		const beveragesData = await beverages.json();
+		expect(Array.isArray(beveragesData)).toBe(true);
+		expect(beveragesData.length).toBe(2);
 	});
 });
