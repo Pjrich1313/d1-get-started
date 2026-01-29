@@ -1,3 +1,4 @@
+# GitHub Actions workflow for continuous integration
 name: CI
 
 on:
