@@ -33,3 +33,8 @@ npm run deploy
 ## About pamela
 
 pamela demonstrates the basics of working with Cloudflare D1 database in a Workers environment.
+
+## Documentation
+
+- [TOIL_MANAGEMENT.md](./TOIL_MANAGEMENT.md) - Understanding accepted toil and automation decisions in this project
+- [PERFORMANCE_OPTIMIZATIONS.md](./PERFORMANCE_OPTIMIZATIONS.md) - Performance improvements and optimization strategies
