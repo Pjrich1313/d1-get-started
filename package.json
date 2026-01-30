@@ -9,6 +9,8 @@
     "test": "vitest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "type-check": "tsc --noEmit",
     "cf-typegen": "wrangler types",
     "postdeploy": "wrangler d1 execute DB --file=schema.sql --remote"
@@ -19,6 +21,7 @@
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.54.0",
     "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
     "typescript": "^5.5.2",
     "vitest": "~3.0.7",
     "wrangler": "^4.14.0"
