@@ -24,6 +24,22 @@ npm install
 npm run dev
 ```
 
+### Code Quality
+
+This project maintains high code quality standards with automated checks:
+
+```bash
+# Run all checks
+npm run lint          # Check code for linting issues
+npm run format:check  # Check code formatting
+npm run type-check    # Run TypeScript type checking
+npm test              # Run tests
+
+# Fix issues
+npm run lint:fix      # Auto-fix linting issues
+npm run format        # Auto-format code
+```
+
 ### Deployment
 
 ```bash
