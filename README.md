@@ -41,7 +41,7 @@ This project includes a GitHub Actions workflow for automatic deployment to Clou
    - Navigate to "My Profile" > "API Tokens"
    - Click "Create Token"
    - Use the "Edit Cloudflare Workers" template
-   - Select your account and zone
+   - Select your account (no zone selection needed)
    - Create the token and copy it
 
 2. **Add Secrets to GitHub:**
