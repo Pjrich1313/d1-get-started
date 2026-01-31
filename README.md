@@ -33,3 +33,8 @@ npm run deploy
 ## About pamela
 
 pamela demonstrates the basics of working with Cloudflare D1 database in a Workers environment.
+
+## Documentation
+
+- [Upgrade and Migration Guide](doc/md/Upgrade-and-migration.md) - Learn how to upgrade your Worker, migrate databases, and troubleshoot common issues
+- [Performance Optimizations](PERFORMANCE_OPTIMIZATIONS.md) - Performance improvements and best practices
