@@ -2,7 +2,7 @@
 import { env, createExecutionContext, waitOnExecutionContext, SELF } from 'cloudflare:test';
 import { describe, it, expect, beforeAll } from 'vitest';
 import worker from '../src/index';
-import { COMPANY_NAMES, RESPONSE_MESSAGES } from '../src/lib/strings';
+import { COMPANY_NAMES } from '../src/lib/strings';
 
 // For now, you'll need to do something like this to get a correctly-typed
 // `Request` to pass to `worker.fetch()`.
