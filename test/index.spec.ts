@@ -2,6 +2,7 @@
 import { env, createExecutionContext, waitOnExecutionContext, SELF } from 'cloudflare:test';
 import { describe, it, expect, beforeAll } from 'vitest';
 import worker from '../src/index';
+import { COMPANY_NAMES } from '../src/lib/strings';
 
 // For now, you'll need to do something like this to get a correctly-typed
 // `Request` to pass to `worker.fetch()`.
@@ -18,8 +19,8 @@ describe('D1 Beverages Worker', () => {
 		await env.DB.batch([
 			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(1, 'Alfreds Futterkiste', 'Maria Anders'),
 			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(4, 'Around the Horn', 'Thomas Hardy'),
-			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(11, 'Bs Beverages', 'Victoria Ashworth'),
-			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(13, 'Bs Beverages', 'Random Name')
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(11, COMPANY_NAMES.BS_BEVERAGES, 'Victoria Ashworth'),
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName) VALUES (?, ?, ?)`).bind(13, COMPANY_NAMES.BS_BEVERAGES, 'Random Name')
 		]);
 	});
 
@@ -50,7 +51,7 @@ describe('D1 Beverages Worker', () => {
 		const data = await response.json();
 		expect(Array.isArray(data)).toBe(true);
 		expect(data.length).toBe(2);
-		expect(data[0]).toHaveProperty('CompanyName', 'Bs Beverages');
+		expect(data[0]).toHaveProperty('CompanyName', COMPANY_NAMES.BS_BEVERAGES);
 		expect(data[0]).toHaveProperty('ContactName');
 		expect(data[0]).toHaveProperty('CustomerId');
 	});
