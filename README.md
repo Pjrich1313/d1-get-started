@@ -33,3 +33,34 @@ npm run deploy
 ## About pamela
 
 pamela demonstrates the basics of working with Cloudflare D1 database in a Workers environment.
+
+## API Endpoints
+
+### GET /api/beverages
+Returns all customers from Bs Beverages company.
+
+**Response:**
+```json
+[
+  {
+    "CustomerId": 11,
+    "CompanyName": "Bs Beverages",
+    "ContactName": "Victoria Ashworth"
+  }
+]
+```
+
+### GET /api/customers/open
+Returns all customers with 'open' status.
+
+**Response:**
+```json
+[
+  {
+    "CustomerId": 1,
+    "CompanyName": "Alfreds Futterkiste",
+    "ContactName": "Maria Anders",
+    "Status": "open"
+  }
+]
+```

@@ -28,8 +28,31 @@ export default {
       }
     }
 
+    if (pathname === "/api/customers/open") {
+      try {
+        // Get all customers with 'open' status
+        const { results } = await env.DB.prepare(
+          "SELECT CustomerId, CompanyName, ContactName, Status FROM Customers WHERE Status = ?"
+        )
+          .bind("open")
+          .all();
+        
+        return Response.json(results, {
+          headers: {
+            "Cache-Control": "public, max-age=60",
+          },
+        });
+      } catch (error) {
+        console.error("Database query failed:", error);
+        return Response.json(
+          { error: "Failed to fetch open customers" },
+          { status: 500 }
+        );
+      }
+    }
+
     return new Response(
-      "Call /api/beverages to see everyone who works at Bs Beverages"
+      "Call /api/beverages to see everyone who works at Bs Beverages or /api/customers/open to see all open customers"
     );
   },
 } satisfies ExportedHandler<Env>;
