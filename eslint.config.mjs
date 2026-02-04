@@ -29,6 +29,7 @@ export default tseslint.config(
       "*.js",
       "*.mjs",
       "*.mts",
+      "src/**/*.js",
       "worker-configuration.d.ts",
       "test/env.d.ts",
     ],
