@@ -5,29 +5,36 @@ This document outlines the performance improvements made to the d1-get-started a
 ## Database Query Optimizations
 
 ### 1. Explicit Column Selection (High Impact)
+
 **Before:**
+
 ```typescript
 SELECT * FROM Customers WHERE CompanyName = ?
 ```
 
 **After:**
+
 ```typescript
 SELECT CustomerId, CompanyName, ContactName FROM Customers WHERE CompanyName = ?
 ```
 
 **Benefits:**
+
 - Reduces data transfer between D1 database and Worker
 - Improves query performance by only fetching required columns
 - Reduces memory usage in the Worker runtime
 - Makes the API contract explicit and maintainable
 
-**Impact:** 
+**Impact:**
+
 - Lower latency for database queries
 - Reduced bandwidth usage
 - Better scalability as dataset grows
 
 ### 2. Response Caching (High Impact)
+
 **Added:**
+
 ```typescript
 return Response.json(results, {
   headers: {
@@ -37,18 +44,22 @@ return Response.json(results, {
 ```
 
 **Benefits:**
+
 - Enables browser and CDN caching for 60 seconds
 - Reduces load on the Worker and D1 database
 - Improves response time for repeated requests
 - Lower costs due to fewer database queries
 
 **Impact:**
+
 - Significantly reduced response time for cached requests
 - Reduced D1 database read operations
 - Lower Worker CPU time usage
 
 ### 3. Error Handling (Medium Impact)
+
 **Added:**
+
 ```typescript
 try {
   // Database operations
@@ -62,12 +73,14 @@ try {
 ```
 
 **Benefits:**
+
 - Prevents Worker crashes from unhandled database errors
 - Provides meaningful error messages to clients
 - Enables error monitoring and debugging
 - Improves application reliability
 
 **Impact:**
+
 - Better user experience during failures
 - Easier debugging and monitoring
 - Improved application uptime
@@ -75,7 +88,9 @@ try {
 ## Test Optimizations
 
 ### 4. Batch Inserts for Test Data (Medium Impact)
+
 **Added:**
+
 ```typescript
 await env.DB.batch([
   env.DB.prepare(`INSERT INTO Customers ...`).bind(...),
@@ -85,11 +100,13 @@ await env.DB.batch([
 ```
 
 **Benefits:**
+
 - Reduces test setup time by batching multiple inserts
 - More efficient use of database connections
 - Better test performance
 
 **Impact:**
+
 - Faster test execution
 - More efficient CI/CD pipelines
 
