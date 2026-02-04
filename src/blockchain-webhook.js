@@ -6,7 +6,7 @@
 
 export default {
   async fetch(request, env) {
-    const { pathname, searchParams } = new URL(request.url);
+    const { pathname } = new URL(request.url);
 
     // Only handle POST requests to the webhook endpoint
     if (pathname === "/webhook" && request.method === "POST") {
