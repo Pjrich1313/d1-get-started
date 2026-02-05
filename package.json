@@ -2,6 +2,9 @@
   "name": "d1-get-started",
   "version": "0.0.0",
   "private": true,
+  "engines": {
+    "node": ">=20.18.1"
+  },
   "scripts": {
     "build": "tsc --noEmit",
     "deploy": "wrangler deploy",
@@ -27,6 +30,6 @@
     "typescript": "^5.5.2",
     "typescript-eslint": "^8.54.0",
     "vitest": "~3.0.7",
-    "wrangler": "^4.14.0"
+    "wrangler": "^4.62.0"
   }
 }
