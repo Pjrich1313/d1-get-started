@@ -15,12 +15,14 @@ A Binary Search Tree (BST) is a hierarchical data structure where each node has 
 ## Time Complexities
 
 ### Average Case
+
 - **Search**: O(log n)
 - **Insert**: O(log n)
 - **Delete**: O(log n)
 - **Traversal**: O(n)
 
 ### Worst Case (Unbalanced Tree)
+
 - All operations: O(n)
 
 ## Usage
@@ -28,7 +30,7 @@ A Binary Search Tree (BST) is a hierarchical data structure where each node has 
 ### Import
 
 ```typescript
-import { BinarySearchTree } from './src/binary-search-tree';
+import { BinarySearchTree } from "./src/binary-search-tree";
 ```
 
 ### Creating a BST
@@ -56,6 +58,7 @@ bst.insert(13);
 ```
 
 This creates the following tree structure:
+
 ```
        8
       / \
@@ -69,38 +72,43 @@ This creates the following tree structure:
 ### Searching for Values
 
 ```typescript
-const exists = bst.search(6);  // returns true
+const exists = bst.search(6); // returns true
 const missing = bst.search(5); // returns false
 ```
 
 ### Deleting Values
 
 The delete operation handles three cases:
+
 1. Deleting a leaf node (no children)
 2. Deleting a node with one child
 3. Deleting a node with two children
 
 ```typescript
-bst.delete(1);  // Delete leaf node
+bst.delete(1); // Delete leaf node
 bst.delete(10); // Delete node with children
 ```
 
 ### Traversal Methods
 
 #### In-Order Traversal (Left-Root-Right)
+
 Returns values in sorted order:
+
 ```typescript
 const sorted = bst.inOrderTraversal();
 // Returns: [1, 3, 4, 6, 7, 8, 10, 13, 14]
 ```
 
 #### Pre-Order Traversal (Root-Left-Right)
+
 ```typescript
 const preOrder = bst.preOrderTraversal();
 // Returns: [8, 3, 1, 6, 4, 7, 10, 14, 13]
 ```
 
 #### Post-Order Traversal (Left-Right-Root)
+
 ```typescript
 const postOrder = bst.postOrderTraversal();
 // Returns: [1, 4, 7, 6, 3, 13, 14, 10, 8]
@@ -109,21 +117,25 @@ const postOrder = bst.postOrderTraversal();
 ### Utility Methods
 
 #### Check if Tree is Empty
+
 ```typescript
 const empty = bst.isEmpty(); // returns false if tree has nodes
 ```
 
 #### Get Tree Height
+
 ```typescript
 const height = bst.getHeight(); // returns the height of the tree
 ```
 
 #### Get Minimum Value
+
 ```typescript
 const min = bst.getMin(); // returns the smallest value in the tree
 ```
 
 #### Get Maximum Value
+
 ```typescript
 const max = bst.getMax(); // returns the largest value in the tree
 ```
@@ -141,7 +153,7 @@ nameBst.insert("fox");
 console.log(nameBst.inOrderTraversal());
 // Output: ["ant", "cat", "dog", "elephant", "fox"]
 
-console.log(nameBst.search("cat"));  // true
+console.log(nameBst.search("cat")); // true
 console.log(nameBst.search("zebra")); // false
 ```
 
@@ -150,6 +162,7 @@ console.log(nameBst.search("zebra")); // false
 ### BinarySearchTree Class
 
 #### Constructor
+
 - `new BinarySearchTree<T>()`: Creates a new empty BST
 
 #### Methods
@@ -170,6 +183,7 @@ console.log(nameBst.search("zebra")); // false
 Represents a single node in the tree. Generally, you don't need to interact with this class directly.
 
 #### Properties
+
 - `value: T` - The value stored in the node
 - `left: TreeNode<T> | null` - Reference to the left child
 - `right: TreeNode<T> | null` - Reference to the right child
@@ -177,6 +191,7 @@ Represents a single node in the tree. Generally, you don't need to interact with
 ## Testing
 
 The implementation includes comprehensive tests covering:
+
 - Node creation
 - Empty tree operations
 - Insert operations (single, multiple, duplicates)
@@ -188,6 +203,7 @@ The implementation includes comprehensive tests covering:
 - Edge cases (single node, unbalanced tree)
 
 Run the tests:
+
 ```bash
 npm test -- binary-search-tree.spec.ts
 ```
@@ -213,6 +229,7 @@ This is a basic BST implementation without self-balancing. In the worst case (e.
 ## References
 
 For more information about Binary Search Trees:
+
 - [Wikipedia: Binary Search Tree](https://en.wikipedia.org/wiki/Binary_search_tree)
 - Useful in: databases, file systems, expression parsing, and more
 - Related structures: AVL trees, Red-Black trees, B-trees
