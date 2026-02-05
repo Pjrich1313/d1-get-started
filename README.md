@@ -1,10 +1,10 @@
-# pamela
+# d1-get-started
 
 A Cloudflare Workers project using D1 database.
 
 ## Getting Started
 
-This is pamela, a starter template for working with Cloudflare D1.
+This is d1-get-started, a starter template for working with Cloudflare D1.
 
 ### Prerequisites
 
@@ -30,6 +30,6 @@ npm run dev
 npm run deploy
 ```
 
-## About pamela
+## About d1-get-started
 
-pamela demonstrates the basics of working with Cloudflare D1 database in a Workers environment.
+d1-get-started demonstrates the basics of working with Cloudflare D1 database in a Workers environment.
