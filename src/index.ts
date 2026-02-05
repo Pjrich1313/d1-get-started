@@ -11,7 +11,7 @@ export default {
         )
           .bind("Bs Beverages")
           .all();
-        
+
         // Add cache headers for better performance
         return Response.json(results, {
           headers: {
