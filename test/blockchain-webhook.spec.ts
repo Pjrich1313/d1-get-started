@@ -161,8 +161,9 @@ describe("Blockchain Webhook Worker", () => {
     const endTime = Date.now();
     const elapsedTime = endTime - startTime;
 
-    // Verify the delay was applied (should be at least 1000ms)
-    expect(elapsedTime).toBeGreaterThanOrEqual(1000);
+    // Verify the delay was applied (should be between 950ms and 1500ms to account for timing variations)
+    expect(elapsedTime).toBeGreaterThanOrEqual(950);
+    expect(elapsedTime).toBeLessThan(1500);
     expect(response.status).toBe(200);
     const data = await response.json();
     expect(data.success).toBe(true);
