@@ -62,6 +62,7 @@ describe("Blockchain Webhook Worker", () => {
     expect(data.success).toBe(true);
     expect(data.message).toContain("pamela");
     expect(data.message).toContain("Blockchain webhook received and stored");
+    expect(data.message).toContain("delay applied");
     expect(data).toHaveProperty("webhookId");
     expect(data).toHaveProperty("timestamp");
   });
@@ -136,5 +137,35 @@ describe("Blockchain Webhook Worker", () => {
     expect(data.success).toBe(false);
     expect(data.error).toContain("Failed to process blockchain webhook");
     expect(data.error).toContain("pamela");
+  });
+
+  it("applies 1-second delay before storing webhook data", async () => {
+    const webhookPayload = {
+      blockNumber: 99999,
+      transactionHash: "0xdelay_test",
+      eventType: "test_delay",
+    };
+
+    const request = new IncomingRequest("http://example.com/webhook", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(webhookPayload),
+    });
+
+    const ctx = createExecutionContext();
+    const startTime = Date.now();
+    const response = await worker.fetch(request, env, ctx);
+    await waitOnExecutionContext(ctx);
+    const endTime = Date.now();
+    const elapsedTime = endTime - startTime;
+
+    // Verify the delay was applied (should be at least 1000ms)
+    expect(elapsedTime).toBeGreaterThanOrEqual(1000);
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data.success).toBe(true);
+    expect(data.message).toContain("delay applied");
   });
 });
