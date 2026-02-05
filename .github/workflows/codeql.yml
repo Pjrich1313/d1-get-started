@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ['javascript', 'csharp']  # Adjust languages based on your repo's code
+        language: ['javascript']  # TypeScript/JavaScript only
 
     steps:
     - name: Checkout repository
