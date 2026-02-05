@@ -103,4 +103,150 @@ describe('D1 Beverages Worker', () => {
 			expect(customer.Status).toBe('open');
 		});
 	});
+
+	it('handles database error for beverages endpoint (unit style)', async () => {
+		// Drop the table to simulate a database error
+		await env.DB.exec(`DROP TABLE IF EXISTS Customers`);
+		
+		const request = new IncomingRequest('http://example.com/api/beverages');
+		const ctx = createExecutionContext();
+		const response = await worker.fetch(request, env, ctx);
+		await waitOnExecutionContext(ctx);
+		
+		expect(response.status).toBe(500);
+		const data = await response.json();
+		expect(data).toHaveProperty('error');
+		expect(data.error).toBe('Failed to fetch beverages data');
+		
+		// Recreate table for other tests
+		await env.DB.exec(`CREATE TABLE IF NOT EXISTS Customers (CustomerId INTEGER PRIMARY KEY, CompanyName TEXT, ContactName TEXT, Status TEXT DEFAULT 'open')`);
+		await env.DB.batch([
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName, Status) VALUES (?, ?, ?, ?)`).bind(1, 'Alfreds Futterkiste', 'Maria Anders', 'open'),
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName, Status) VALUES (?, ?, ?, ?)`).bind(4, 'Around the Horn', 'Thomas Hardy', 'closed'),
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName, Status) VALUES (?, ?, ?, ?)`).bind(11, 'Bs Beverages', 'Victoria Ashworth', 'open'),
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName, Status) VALUES (?, ?, ?, ?)`).bind(13, 'Bs Beverages', 'Random Name', 'open')
+		]);
+	});
+
+	it('handles database error for beverages endpoint (integration style)', async () => {
+		// Drop the table to simulate a database error
+		await env.DB.exec(`DROP TABLE IF EXISTS Customers`);
+		
+		const response = await SELF.fetch('https://example.com/api/beverages');
+		
+		expect(response.status).toBe(500);
+		const data = await response.json();
+		expect(data).toHaveProperty('error');
+		expect(data.error).toBe('Failed to fetch beverages data');
+		
+		// Recreate table for other tests
+		await env.DB.exec(`CREATE TABLE IF NOT EXISTS Customers (CustomerId INTEGER PRIMARY KEY, CompanyName TEXT, ContactName TEXT, Status TEXT DEFAULT 'open')`);
+		await env.DB.batch([
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName, Status) VALUES (?, ?, ?, ?)`).bind(1, 'Alfreds Futterkiste', 'Maria Anders', 'open'),
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName, Status) VALUES (?, ?, ?, ?)`).bind(4, 'Around the Horn', 'Thomas Hardy', 'closed'),
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName, Status) VALUES (?, ?, ?, ?)`).bind(11, 'Bs Beverages', 'Victoria Ashworth', 'open'),
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName, Status) VALUES (?, ?, ?, ?)`).bind(13, 'Bs Beverages', 'Random Name', 'open')
+		]);
+	});
+
+	it('handles database error for open customers endpoint (unit style)', async () => {
+		// Drop the table to simulate a database error
+		await env.DB.exec(`DROP TABLE IF EXISTS Customers`);
+		
+		const request = new IncomingRequest('http://example.com/api/customers/open');
+		const ctx = createExecutionContext();
+		const response = await worker.fetch(request, env, ctx);
+		await waitOnExecutionContext(ctx);
+		
+		expect(response.status).toBe(500);
+		const data = await response.json();
+		expect(data).toHaveProperty('error');
+		expect(data.error).toBe('Failed to fetch open customers');
+		
+		// Recreate table for other tests
+		await env.DB.exec(`CREATE TABLE IF NOT EXISTS Customers (CustomerId INTEGER PRIMARY KEY, CompanyName TEXT, ContactName TEXT, Status TEXT DEFAULT 'open')`);
+		await env.DB.batch([
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName, Status) VALUES (?, ?, ?, ?)`).bind(1, 'Alfreds Futterkiste', 'Maria Anders', 'open'),
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName, Status) VALUES (?, ?, ?, ?)`).bind(4, 'Around the Horn', 'Thomas Hardy', 'closed'),
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName, Status) VALUES (?, ?, ?, ?)`).bind(11, 'Bs Beverages', 'Victoria Ashworth', 'open'),
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName, Status) VALUES (?, ?, ?, ?)`).bind(13, 'Bs Beverages', 'Random Name', 'open')
+		]);
+	});
+
+	it('handles database error for open customers endpoint (integration style)', async () => {
+		// Drop the table to simulate a database error
+		await env.DB.exec(`DROP TABLE IF EXISTS Customers`);
+		
+		const response = await SELF.fetch('https://example.com/api/customers/open');
+		
+		expect(response.status).toBe(500);
+		const data = await response.json();
+		expect(data).toHaveProperty('error');
+		expect(data.error).toBe('Failed to fetch open customers');
+		
+		// Recreate table for other tests
+		await env.DB.exec(`CREATE TABLE IF NOT EXISTS Customers (CustomerId INTEGER PRIMARY KEY, CompanyName TEXT, ContactName TEXT, Status TEXT DEFAULT 'open')`);
+		await env.DB.batch([
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName, Status) VALUES (?, ?, ?, ?)`).bind(1, 'Alfreds Futterkiste', 'Maria Anders', 'open'),
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName, Status) VALUES (?, ?, ?, ?)`).bind(4, 'Around the Horn', 'Thomas Hardy', 'closed'),
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName, Status) VALUES (?, ?, ?, ?)`).bind(11, 'Bs Beverages', 'Victoria Ashworth', 'open'),
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName, Status) VALUES (?, ?, ?, ?)`).bind(13, 'Bs Beverages', 'Random Name', 'open')
+		]);
+	});
+
+	it('handles empty result set for beverages (unit style)', async () => {
+		// Clear all Bs Beverages entries temporarily
+		await env.DB.prepare(`DELETE FROM Customers WHERE CompanyName = ?`).bind('Bs Beverages').run();
+		
+		const request = new IncomingRequest('http://example.com/api/beverages');
+		const ctx = createExecutionContext();
+		const response = await worker.fetch(request, env, ctx);
+		await waitOnExecutionContext(ctx);
+		
+		expect(response.status).toBe(200);
+		const data = await response.json();
+		expect(Array.isArray(data)).toBe(true);
+		expect(data.length).toBe(0);
+		
+		// Restore deleted data
+		await env.DB.batch([
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName, Status) VALUES (?, ?, ?, ?)`).bind(11, 'Bs Beverages', 'Victoria Ashworth', 'open'),
+			env.DB.prepare(`INSERT INTO Customers (CustomerID, CompanyName, ContactName, Status) VALUES (?, ?, ?, ?)`).bind(13, 'Bs Beverages', 'Random Name', 'open')
+		]);
+	});
+
+	it('handles empty result set for open customers (unit style)', async () => {
+		// Update all customers to closed status temporarily
+		await env.DB.prepare(`UPDATE Customers SET Status = ?`).bind('closed').run();
+		
+		const request = new IncomingRequest('http://example.com/api/customers/open');
+		const ctx = createExecutionContext();
+		const response = await worker.fetch(request, env, ctx);
+		await waitOnExecutionContext(ctx);
+		
+		expect(response.status).toBe(200);
+		const data = await response.json();
+		expect(Array.isArray(data)).toBe(true);
+		expect(data.length).toBe(0);
+		
+		// Restore statuses
+		await env.DB.prepare(`UPDATE Customers SET Status = ? WHERE CustomerID IN (?, ?, ?)`).bind('open', 1, 11, 13).run();
+	});
+
+	it('handles invalid/unknown paths correctly', async () => {
+		const testPaths = [
+			'/api/unknown',
+			'/api/customers',
+			'/api',
+			'/unknown',
+			'/api/beverages/123'
+		];
+		
+		for (const path of testPaths) {
+			const response = await SELF.fetch(`https://example.com${path}`);
+			expect(response.status).toBe(200);
+			const text = await response.text();
+			expect(text).toBe('Call /api/beverages to see everyone who works at Bs Beverages or /api/customers/open to see all open customers');
+		}
+	});
 });
