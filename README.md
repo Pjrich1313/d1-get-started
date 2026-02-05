@@ -2,6 +2,9 @@
 
 A Cloudflare Workers project using D1 database.
 
+[![CI](https://github.com/Pjrich1313/d1-get-started/actions/workflows/ci.yml/badge.svg)](https://github.com/Pjrich1313/d1-get-started/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/Pjrich1313/d1-get-started/actions/workflows/codeql.yml/badge.svg)](https://github.com/Pjrich1313/d1-get-started/actions/workflows/codeql.yml)
+
 ## Getting Started
 
 This is pamela, a starter template for working with Cloudflare D1.
