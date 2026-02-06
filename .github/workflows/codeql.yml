@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ['javascript', 'typescript']  # Adjust languages based on your repo's code
+        language: ['javascript']  # JavaScript analyzer handles both JS and TS files
 
     steps:
     - name: Checkout repository
