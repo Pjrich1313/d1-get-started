@@ -85,3 +85,94 @@ describe("D1 Beverages Worker", () => {
     expect(data.length).toBe(2);
   });
 });
+
+describe("KV Key-Value Store", () => {
+  it("sets a key-value pair (unit style)", async () => {
+    const request = new IncomingRequest("http://example.com/api/keys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "testKey", value: "testValue" }),
+    });
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, env, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data).toEqual({ success: true, key: "testKey", value: "testValue" });
+  });
+
+  it("sets a key-value pair (integration style)", async () => {
+    const response = await SELF.fetch("https://example.com/api/keys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "integrationKey", value: "integrationValue" }),
+    });
+
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data).toEqual({
+      success: true,
+      key: "integrationKey",
+      value: "integrationValue",
+    });
+  });
+
+  it("retrieves a value by key (unit style)", async () => {
+    // First set a key
+    await env.KV.put("retrieveTest", "retrieveValue");
+
+    const request = new IncomingRequest("http://example.com/api/keys/retrieveTest");
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, env, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data).toEqual({ key: "retrieveTest", value: "retrieveValue" });
+  });
+
+  it("retrieves a value by key (integration style)", async () => {
+    // First set a key
+    await env.KV.put("integrationRetrieveTest", "integrationRetrieveValue");
+
+    const response = await SELF.fetch(
+      "https://example.com/api/keys/integrationRetrieveTest"
+    );
+
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data).toEqual({
+      key: "integrationRetrieveTest",
+      value: "integrationRetrieveValue",
+    });
+  });
+
+  it("returns 404 for non-existent key", async () => {
+    const request = new IncomingRequest(
+      "http://example.com/api/keys/nonExistentKey"
+    );
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, env, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(404);
+    const data = await response.json();
+    expect(data).toEqual({ error: "Key not found" });
+  });
+
+  it("returns 400 when key or value is missing", async () => {
+    const request = new IncomingRequest("http://example.com/api/keys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "testKey" }), // missing value
+    });
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, env, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(400);
+    const data = await response.json();
+    expect(data).toEqual({ error: "Both key and value are required" });
+  });
+});
