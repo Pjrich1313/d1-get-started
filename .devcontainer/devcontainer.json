@@ -7,7 +7,7 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "/home/runner/work/d1-get-started/d1-get-started"
+        "${containerWorkspaceFolder}"
       ]
     },
     "github": {
