@@ -52,3 +52,12 @@ This project includes a blockchain webhook handler that can receive and store we
 - Getting started with Ethereum development
 
 For webhook implementation details, see `src/blockchain-webhook.js`.
+
+## License
+
+This project is dual-licensed under your choice of:
+
+- MIT License ([LICENSE-MIT](LICENSE-MIT))
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE))
+
+You may use this project under the terms of either license.

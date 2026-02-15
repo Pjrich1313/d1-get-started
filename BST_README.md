@@ -236,4 +236,4 @@ For more information about Binary Search Trees:
 
 ## License
 
-This implementation is part of the d1-get-started repository.
+This implementation is part of the d1-get-started repository, which is dual-licensed under MIT and Apache 2.0. See the [LICENSE-MIT](LICENSE-MIT) and [LICENSE-APACHE](LICENSE-APACHE) files for details.
