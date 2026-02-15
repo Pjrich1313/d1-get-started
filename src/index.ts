@@ -9,10 +9,7 @@ export default {
       try {
         const value = await env.KV.get(key);
         if (value === null) {
-          return Response.json(
-            { error: "Key not found" },
-            { status: 404 }
-          );
+          return Response.json({ error: "Key not found" }, { status: 404 });
         }
         return Response.json({ key, value });
       } catch (error) {
@@ -27,24 +24,21 @@ export default {
     // POST /api/keys - set key-value pair
     if (pathname === "/api/keys" && request.method === "POST") {
       try {
-        const body = await request.json() as { key?: string; value?: string };
+        const body = (await request.json()) as { key?: string; value?: string };
         const { key, value } = body;
-        
-        if (!key || value === undefined) {
+
+        if (!key || key.trim() === "" || value === undefined) {
           return Response.json(
             { error: "Both key and value are required" },
             { status: 400 }
           );
         }
 
-        await env.KV.put(key, value);
+        await env.KV.put(key, String(value));
         return Response.json({ success: true, key, value });
       } catch (error) {
         console.error("KV put failed:", error);
-        return Response.json(
-          { error: "Failed to set key" },
-          { status: 500 }
-        );
+        return Response.json({ error: "Failed to set key" }, { status: 500 });
       }
     }
 

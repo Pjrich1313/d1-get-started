@@ -106,7 +106,10 @@ describe("KV Key-Value Store", () => {
     const response = await SELF.fetch("https://example.com/api/keys", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ key: "integrationKey", value: "integrationValue" }),
+      body: JSON.stringify({
+        key: "integrationKey",
+        value: "integrationValue",
+      }),
     });
 
     expect(response.status).toBe(200);
@@ -122,7 +125,9 @@ describe("KV Key-Value Store", () => {
     // First set a key
     await env.KV.put("retrieveTest", "retrieveValue");
 
-    const request = new IncomingRequest("http://example.com/api/keys/retrieveTest");
+    const request = new IncomingRequest(
+      "http://example.com/api/keys/retrieveTest"
+    );
     const ctx = createExecutionContext();
     const response = await worker.fetch(request, env, ctx);
     await waitOnExecutionContext(ctx);
@@ -166,6 +171,36 @@ describe("KV Key-Value Store", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ key: "testKey" }), // missing value
+    });
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, env, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(400);
+    const data = await response.json();
+    expect(data).toEqual({ error: "Both key and value are required" });
+  });
+
+  it("returns 400 when key is empty string", async () => {
+    const request = new IncomingRequest("http://example.com/api/keys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "", value: "testValue" }), // empty key
+    });
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, env, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(400);
+    const data = await response.json();
+    expect(data).toEqual({ error: "Both key and value are required" });
+  });
+
+  it("returns 400 when key is only whitespace", async () => {
+    const request = new IncomingRequest("http://example.com/api/keys", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "   ", value: "testValue" }), // whitespace key
     });
     const ctx = createExecutionContext();
     const response = await worker.fetch(request, env, ctx);
