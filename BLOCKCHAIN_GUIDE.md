@@ -35,7 +35,7 @@ This Cloudflare Workers project (`pamela`) includes blockchain webhook handling 
 
 ### Blockchain Webhook Handler
 
-- **File**: `src/blockchain-webhook.js`
+- **File**: `src/index.ts` (unified worker with blockchain webhook support)
 - **Purpose**: Receives and stores blockchain webhook data in a D1 database
 - **Endpoint**: POST `/webhook`
 - **Database**: Stores webhook data in `BlockchainWebhooks` table
@@ -121,7 +121,7 @@ If you have questions about:
 
 - **Ethereum integration** - Check the Ethereum documentation or community forums
 - **OpenZeppelin contracts** - Visit the OpenZeppelin documentation
-- **This project's webhook handler** - See `src/blockchain-webhook.js` for implementation details
+- **This project's webhook handler** - See `src/index.ts` for implementation details (unified worker)
 - **Cloudflare Workers** - Refer to the Cloudflare Workers documentation
 
 For project-specific questions, please open an issue in the GitHub repository.

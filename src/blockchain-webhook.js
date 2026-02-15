@@ -3,6 +3,10 @@
  * Cloudflare Worker for handling blockchain webhook POST requests
  * Compatible with Wrangler 4.62.0 and Node.js 20+
  * 
+ * ⚠️ DEPRECATED: This standalone worker has been merged into src/index.ts
+ * The unified worker at src/index.ts now handles both /api/beverages and /webhook endpoints.
+ * This file is kept for reference and backward compatibility testing only.
+ * 
  * This webhook handler receives blockchain event notifications from services like:
  * - Alchemy (Ethereum, Polygon, etc.)
  * - Infura (Ethereum infrastructure)
