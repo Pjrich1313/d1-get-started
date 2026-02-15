@@ -51,4 +51,4 @@ This project includes a blockchain webhook handler that can receive and store we
 - How to use the blockchain webhook handler
 - Getting started with Ethereum development
 
-For webhook implementation details, see `src/blockchain-webhook.js`.
+The blockchain webhook is implemented in the main worker (`src/index.ts`) and handles POST requests to the `/webhook` endpoint.
