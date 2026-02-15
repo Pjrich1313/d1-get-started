@@ -175,16 +175,16 @@ export class BinarySearchTree<T> {
    * @returns Array of values in sorted order
    */
   inOrderTraversal(): T[] {
-    const result: T[] = [];
-    this.inOrder(this.root, result);
-    return result;
+    const values: T[] = [];
+    this.inOrder(this.root, values);
+    return values;
   }
 
-  private inOrder(node: TreeNode<T> | null, result: T[]): void {
+  private inOrder(node: TreeNode<T> | null, values: T[]): void {
     if (node !== null) {
-      this.inOrder(node.left, result);
-      result.push(node.value);
-      this.inOrder(node.right, result);
+      this.inOrder(node.left, values);
+      values.push(node.value);
+      this.inOrder(node.right, values);
     }
   }
 
@@ -193,16 +193,16 @@ export class BinarySearchTree<T> {
    * @returns Array of values in pre-order
    */
   preOrderTraversal(): T[] {
-    const result: T[] = [];
-    this.preOrder(this.root, result);
-    return result;
+    const values: T[] = [];
+    this.preOrder(this.root, values);
+    return values;
   }
 
-  private preOrder(node: TreeNode<T> | null, result: T[]): void {
+  private preOrder(node: TreeNode<T> | null, values: T[]): void {
     if (node !== null) {
-      result.push(node.value);
-      this.preOrder(node.left, result);
-      this.preOrder(node.right, result);
+      values.push(node.value);
+      this.preOrder(node.left, values);
+      this.preOrder(node.right, values);
     }
   }
 
@@ -211,16 +211,16 @@ export class BinarySearchTree<T> {
    * @returns Array of values in post-order
    */
   postOrderTraversal(): T[] {
-    const result: T[] = [];
-    this.postOrder(this.root, result);
-    return result;
+    const values: T[] = [];
+    this.postOrder(this.root, values);
+    return values;
   }
 
-  private postOrder(node: TreeNode<T> | null, result: T[]): void {
+  private postOrder(node: TreeNode<T> | null, values: T[]): void {
     if (node !== null) {
-      this.postOrder(node.left, result);
-      this.postOrder(node.right, result);
-      result.push(node.value);
+      this.postOrder(node.left, values);
+      this.postOrder(node.right, values);
+      values.push(node.value);
     }
   }
 
