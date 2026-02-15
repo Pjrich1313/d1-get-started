@@ -40,6 +40,9 @@ export default {
           .bind(dataJson, timestamp)
           .run();
 
+        // Note: Do not close the D1 database connection manually.
+        // Cloudflare Workers runtime automatically manages the connection lifecycle.
+
         // Return success response with 'pamela' included
         return Response.json(
           {

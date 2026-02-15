@@ -12,6 +12,9 @@ export default {
           .bind("Bs Beverages")
           .all();
 
+        // Note: Do not close the D1 database connection manually.
+        // Cloudflare Workers runtime automatically manages the connection lifecycle.
+
         // Add cache headers for better performance
         return Response.json(results, {
           headers: {
