@@ -5,6 +5,7 @@
 This is a Cloudflare Workers project named "pamela" that demonstrates working with D1 database (Cloudflare's SQLite database). The project serves as a starter template for building serverless applications with database integration.
 
 ### Key Features
+
 - **D1 Database Integration**: SQLite database operations using Cloudflare's D1
 - **Blockchain Webhooks**: Receive and process blockchain events from Ethereum and other networks
 - **Binary Search Tree**: Example data structure implementation in TypeScript
@@ -24,33 +25,39 @@ This is a Cloudflare Workers project named "pamela" that demonstrates working wi
 ## Development Workflow
 
 ### Building
+
 ```bash
 npm run build  # Type check with TypeScript (no emit)
 ```
 
 ### Testing
+
 ```bash
 npm test  # Run tests with Vitest
 ```
 
 ### Linting
+
 ```bash
 npm run lint        # Check for linting errors
 npm run lint:fix    # Auto-fix linting errors
 ```
 
 ### Formatting
+
 ```bash
 npm run format:check  # Check formatting
 npm run format        # Auto-format code
 ```
 
 ### Local Development
+
 ```bash
 npm run dev   # Start local development server with Wrangler
 ```
 
 ### Deployment
+
 ```bash
 npm run deploy  # Deploy to Cloudflare Workers
 ```
@@ -58,18 +65,21 @@ npm run deploy  # Deploy to Cloudflare Workers
 ## Code Standards and Conventions
 
 ### TypeScript
+
 - Use TypeScript for all new code
 - Enable strict type checking
 - Avoid using `any` type - use `unknown` or proper types instead
 - Use proper type imports from `@cloudflare/workers-types`
 
 ### Code Style
+
 - Follow existing Prettier configuration (`.prettierrc.json`)
 - Use ESLint rules defined in `eslint.config.mjs`
 - Run `npm run format` before committing
 - Ensure `npm run lint` passes
 
 ### File Organization
+
 - Source code: `src/`
 - Tests: `test/`
 - Database schema: `schema.sql`
@@ -78,12 +88,14 @@ npm run deploy  # Deploy to Cloudflare Workers
 ## Project Structure
 
 ### Source Files (`src/`)
+
 - `index.ts`: Main Workers entry point
 - `blockchain-webhook.js`: Blockchain webhook handler
 - `binary-search-tree.ts`: BST data structure implementation
 - `bst-example.ts`: Example usage of BST
 
 ### Documentation
+
 - `README.md`: Main project documentation
 - `BLOCKCHAIN_GUIDE.md`: Detailed blockchain integration guide
 - `BST_README.md`: Binary search tree documentation
@@ -92,6 +104,7 @@ npm run deploy  # Deploy to Cloudflare Workers
 ## Rules and Restrictions
 
 ### DO:
+
 - Write type-safe TypeScript code
 - Add tests for new functionality using Vitest
 - Follow the existing code patterns and structure
@@ -101,6 +114,7 @@ npm run deploy  # Deploy to Cloudflare Workers
 - Handle errors gracefully in Workers environment
 
 ### DON'T:
+
 - Don't commit secrets or API keys
 - Don't modify `node_modules/` or generated files
 - Don't use `any` type in TypeScript
@@ -134,6 +148,7 @@ npm run deploy  # Deploy to Cloudflare Workers
 ## MCP Server Integration
 
 This project is configured for Model Context Protocol (MCP) in `.devcontainer/devcontainer.json`:
+
 - Filesystem server for file access
 - GitHub server for repository integration
 - Requires `GITHUB_TOKEN` environment variable for GitHub MCP server
@@ -141,6 +156,7 @@ This project is configured for Model Context Protocol (MCP) in `.devcontainer/de
 ## Common Tasks
 
 ### Adding a new endpoint
+
 1. Update `src/index.ts` with new route
 2. Add TypeScript types for request/response
 3. Add tests in `test/` directory
@@ -149,12 +165,14 @@ This project is configured for Model Context Protocol (MCP) in `.devcontainer/de
 6. Run `npm run lint` and `npm run format`
 
 ### Updating database schema
+
 1. Modify `schema.sql`
 2. Test locally first
 3. Deploy changes with `npm run deploy` (runs `postdeploy` script)
 4. Update TypeScript types if needed
 
 ### Adding dependencies
+
 1. Use `npm install <package>` for runtime dependencies
 2. Use `npm install -D <package>` for dev dependencies
 3. Ensure compatibility with Cloudflare Workers
@@ -163,6 +181,7 @@ This project is configured for Model Context Protocol (MCP) in `.devcontainer/de
 ## Issue and PR Guidelines
 
 When working on issues:
+
 - Read the issue description carefully
 - Ask for clarification if requirements are unclear
 - Make minimal, focused changes
