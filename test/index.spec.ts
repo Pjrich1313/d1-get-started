@@ -36,6 +36,17 @@ describe("D1 Beverages Worker", () => {
         `INSERT INTO Customers (CustomerID, CompanyName, ContactName) VALUES (?, ?, ?)`
       ).bind(13, "Bs Beverages", "Random Name"),
     ]);
+
+    await env.DB.batch([
+      env.DB.prepare(`DROP TABLE IF EXISTS BlockchainWebhooks`),
+      env.DB.prepare(
+        `CREATE TABLE IF NOT EXISTS BlockchainWebhooks (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          data TEXT NOT NULL,
+          timestamp TEXT NOT NULL
+        )`
+      ),
+    ]);
   });
 
   it("responds with default message for root path (unit style)", async () => {
@@ -83,5 +94,41 @@ describe("D1 Beverages Worker", () => {
     const data = await response.json();
     expect(Array.isArray(data)).toBe(true);
     expect(data.length).toBe(2);
+  });
+
+  it("handles blockchain webhook posts through the main worker", async () => {
+    const request = new IncomingRequest("http://example.com/webhook", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ event: "test", value: 42 }),
+    });
+
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, env, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.success).toBe(true);
+    expect(body.message).toContain("pamela");
+    expect(body).toHaveProperty("webhookId");
+
+    const { results } = await env.DB.prepare(
+      "SELECT data FROM BlockchainWebhooks WHERE id = ?"
+    )
+      .bind(body.webhookId)
+      .all();
+
+    expect(results.length).toBe(1);
+    expect(JSON.parse(results[0].data)).toMatchObject({ event: "test", value: 42 });
+  });
+
+  it("rejects non-POST webhook requests through the main worker", async () => {
+    const response = await SELF.fetch("https://example.com/webhook");
+    expect(response.status).toBe(405);
+    const data = await response.json();
+    expect(data.error).toContain("Method not allowed");
   });
 });

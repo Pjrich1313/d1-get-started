@@ -2,6 +2,47 @@ export default {
   async fetch(request, env): Promise<Response> {
     const { pathname } = new URL(request.url);
 
+    if (pathname === "/webhook") {
+      if (request.method !== "POST") {
+        return Response.json(
+          { error: "Method not allowed. Only POST requests are accepted." },
+          { status: 405 }
+        );
+      }
+
+      try {
+        const webhookData = await request.json();
+        const timestamp = new Date().toISOString();
+        const dataJson = JSON.stringify(webhookData);
+
+        const result = await env.DB.prepare(
+          "INSERT INTO BlockchainWebhooks (data, timestamp) VALUES (?, ?)"
+        )
+          .bind(dataJson, timestamp)
+          .run();
+
+        return Response.json(
+          {
+            success: true,
+            message: "Blockchain webhook received and stored for pamela",
+            webhookId: result.meta.last_row_id,
+            timestamp,
+          },
+          { status: 200 }
+        );
+      } catch (error) {
+        console.error("Failed to process blockchain webhook:", error);
+        return Response.json(
+          {
+            success: false,
+            error: "Failed to process blockchain webhook for pamela",
+            details: error instanceof Error ? error.message : String(error),
+          },
+          { status: 500 }
+        );
+      }
+    }
+
     if (pathname === "/api/beverages") {
       try {
         // Optimized: Select only needed columns instead of SELECT *
