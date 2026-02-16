@@ -2,6 +2,18 @@ export default {
   async fetch(request, env): Promise<Response> {
     const { pathname } = new URL(request.url);
 
+    // API key authentication for protected endpoints
+    if (pathname.startsWith("/api/")) {
+      const apiKey = request.headers.get("X-API-Key");
+      
+      if (!apiKey || apiKey !== env.API_KEY) {
+        return Response.json(
+          { error: "Unauthorized - Invalid or missing API key" },
+          { status: 401 }
+        );
+      }
+    }
+
     if (pathname === "/api/beverages") {
       try {
         // Optimized: Select only needed columns instead of SELECT *

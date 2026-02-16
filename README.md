@@ -26,9 +26,23 @@ npm run dev
 
 ### Deployment
 
+Before deploying, make sure to set up your API key secret:
+
+```bash
+# Generate a secure API key
+openssl rand -hex 32
+
+# Store it as a Wrangler secret
+wrangler secret put API_KEY
+```
+
+Then deploy:
+
 ```bash
 npm run deploy
 ```
+
+For detailed security setup instructions, see [API_SECURITY.md](./API_SECURITY.md).
 
 ## About pamela
 
@@ -37,6 +51,7 @@ pamela demonstrates the basics of working with Cloudflare D1 database in a Worke
 ## Features
 
 - **D1 Database Integration**: Store and query data using Cloudflare's D1 database
+- **API Key Authentication**: Secure API endpoints with API key authentication (see [API_SECURITY.md](./API_SECURITY.md))
 - **Blockchain Webhooks**: Receive and process blockchain events from Ethereum and other networks
 - **Binary Search Tree**: Example data structure implementation in TypeScript
 - **MCP Server Support**: Configured for Model Context Protocol (MCP) integration with AI tools
