@@ -219,18 +219,17 @@ npm run format:check  # Check markdown formatting
 
 ### Code Blocks
 
-`````markdown
-````typescript
+````markdown
+```typescript
 // TypeScript example
 const value: string = "example";
-```) (remove the backtick before parenthesis)
+```
 
 ```bash
 # Shell command
 npm install
-```) (remove the backtick before parenthesis)
+```
 ````
-`````
 
 ````
 
