@@ -58,7 +58,9 @@ describe("D1 Beverages Worker", () => {
   });
 
   it("returns beverages data from database (unit style)", async () => {
-    const request = new IncomingRequest("http://example.com/api/beverages");
+    const request = new IncomingRequest("http://example.com/api/beverages", {
+      headers: { "X-API-Key": "test-api-key-12345" },
+    });
     const ctx = createExecutionContext();
     const response = await worker.fetch(request, env, ctx);
     await waitOnExecutionContext(ctx);
@@ -75,7 +77,9 @@ describe("D1 Beverages Worker", () => {
   });
 
   it("returns beverages data from database (integration style)", async () => {
-    const response = await SELF.fetch("https://example.com/api/beverages");
+    const response = await SELF.fetch("https://example.com/api/beverages", {
+      headers: { "X-API-Key": "test-api-key-12345" },
+    });
 
     expect(response.status).toBe(200);
     expect(response.headers.get("Cache-Control")).toBe("public, max-age=60");
@@ -83,5 +87,25 @@ describe("D1 Beverages Worker", () => {
     const data = await response.json();
     expect(Array.isArray(data)).toBe(true);
     expect(data.length).toBe(2);
+  });
+
+  it("rejects requests without API key", async () => {
+    const response = await SELF.fetch("https://example.com/api/beverages");
+    
+    expect(response.status).toBe(401);
+    const data = await response.json();
+    expect(data).toHaveProperty("error");
+    expect(data.error).toContain("Unauthorized");
+  });
+
+  it("rejects requests with invalid API key", async () => {
+    const response = await SELF.fetch("https://example.com/api/beverages", {
+      headers: { "X-API-Key": "invalid-key" },
+    });
+    
+    expect(response.status).toBe(401);
+    const data = await response.json();
+    expect(data).toHaveProperty("error");
+    expect(data.error).toContain("Unauthorized");
   });
 });
