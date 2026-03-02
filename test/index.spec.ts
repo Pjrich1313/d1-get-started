@@ -46,14 +46,14 @@ describe("D1 Beverages Worker", () => {
     // Wait for all `Promise`s passed to `ctx.waitUntil()` to settle before running test assertions
     await waitOnExecutionContext(ctx);
     expect(await response.text()).toMatchInlineSnapshot(
-      `"Call /api/beverages to see everyone who works at Bs Beverages"`
+      `"Blockchain Webhook Handler for pamela - Call /api/beverages to see everyone who works at Bs Beverages"`
     );
   });
 
   it("responds with default message for root path (integration style)", async () => {
     const response = await SELF.fetch("https://example.com");
     expect(await response.text()).toMatchInlineSnapshot(
-      `"Call /api/beverages to see everyone who works at Bs Beverages"`
+      `"Blockchain Webhook Handler for pamela - Call /api/beverages to see everyone who works at Bs Beverages"`
     );
   });
 
