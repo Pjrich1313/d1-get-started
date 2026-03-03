@@ -10,6 +10,7 @@
 ## Tech Stack
 
 ### Core Technologies
+
 - **Runtime**: Cloudflare Workers (edge computing platform)
 - **Database**: Cloudflare D1 (serverless SQL database)
 - **Language**: TypeScript (strict mode enabled)
@@ -17,6 +18,7 @@
 - **Target**: ES2021
 
 ### Development Tools
+
 - **Build Tool**: TypeScript compiler (tsc)
 - **Testing**: Vitest with @cloudflare/vitest-pool-workers
 - **Linting**: ESLint with TypeScript ESLint plugin
@@ -25,6 +27,7 @@
 - **Node Version**: >=20.18.1
 
 ### Key Dependencies
+
 - `@cloudflare/workers-types` - TypeScript types for Cloudflare Workers
 - `wrangler` - Cloudflare Workers CLI and development server
 
@@ -45,6 +48,7 @@ wrangler.jsonc         - Wrangler configuration
 ## Coding Conventions
 
 ### TypeScript Style
+
 - **Strict mode**: Always enabled (`"strict": true` in tsconfig.json)
 - **Semicolons**: Required (enforced by Prettier)
 - **Quotes**: Double quotes for strings (enforced by Prettier)
@@ -53,6 +57,7 @@ wrangler.jsonc         - Wrangler configuration
 - **Trailing commas**: ES5 style (no trailing comma on last item)
 
 ### Naming Conventions
+
 - **Variables**: camelCase
 - **Constants**: UPPER_SNAKE_CASE for true constants
 - **Types/Interfaces**: PascalCase
@@ -60,6 +65,7 @@ wrangler.jsonc         - Wrangler configuration
 - **Unused variables**: Prefix with underscore (`_variableName`) to avoid linting errors
 
 ### TypeScript Rules
+
 - Avoid `any` type - prefer explicit typing (warns on `@typescript-eslint/no-explicit-any`)
 - Explicit function return types are optional but encouraged for public APIs
 - Unused variables must be prefixed with `_` or removed
@@ -68,6 +74,7 @@ wrangler.jsonc         - Wrangler configuration
 ## Code Patterns and Best Practices
 
 ### Worker Structure
+
 All Workers must export a default object with a `fetch` handler:
 
 ```typescript
@@ -81,11 +88,14 @@ export default {
 ### D1 Database Queries
 
 **Always use prepared statements with parameter binding**:
+
 ```typescript
 // Good - prevents SQL injection
 const { results } = await env.DB.prepare(
   "SELECT CustomerId, CompanyName FROM Customers WHERE CompanyName = ?"
-).bind("Bs Beverages").all();
+)
+  .bind("Bs Beverages")
+  .all();
 
 // Bad - SQL injection vulnerability
 const { results } = await env.DB.prepare(
@@ -94,28 +104,28 @@ const { results } = await env.DB.prepare(
 ```
 
 **Performance optimization tips**:
+
 - Select only needed columns instead of `SELECT *`
 - Use `.batch()` for multiple inserts/updates in tests
 - Add appropriate indexes for frequently queried columns
 - Include cache headers for cacheable responses
 
 **Error handling**:
+
 ```typescript
 try {
   const { results } = await env.DB.prepare(query).bind(param).all();
   return Response.json(results);
 } catch (error) {
   console.error("Database query failed:", error);
-  return Response.json(
-    { error: "Failed to fetch data" },
-    { status: 500 }
-  );
+  return Response.json({ error: "Failed to fetch data" }, { status: 500 });
 }
 ```
 
 ### Response Patterns
 
 **JSON responses with headers**:
+
 ```typescript
 return Response.json(data, {
   headers: {
@@ -125,18 +135,22 @@ return Response.json(data, {
 ```
 
 **Error responses**:
+
 ```typescript
-return Response.json(
-  { error: "Error message" },
-  { status: 500 }
-);
+return Response.json({ error: "Error message" }, { status: 500 });
 ```
 
 ### Testing Patterns
 
 **Use Vitest with Cloudflare Workers pool**:
+
 ```typescript
-import { env, createExecutionContext, waitOnExecutionContext, SELF } from "cloudflare:test";
+import {
+  env,
+  createExecutionContext,
+  waitOnExecutionContext,
+  SELF,
+} from "cloudflare:test";
 import { describe, it, expect, beforeAll } from "vitest";
 
 describe("Feature tests", () => {
@@ -163,16 +177,26 @@ describe("Feature tests", () => {
 ```
 
 **Use `beforeAll` to initialize test data with `batch()` for performance**:
+
 ```typescript
 await env.DB.batch([
-  env.DB.prepare("INSERT INTO Customers VALUES (?, ?, ?)").bind(1, "Name1", "Contact1"),
-  env.DB.prepare("INSERT INTO Customers VALUES (?, ?, ?)").bind(2, "Name2", "Contact2"),
+  env.DB.prepare("INSERT INTO Customers VALUES (?, ?, ?)").bind(
+    1,
+    "Name1",
+    "Contact1"
+  ),
+  env.DB.prepare("INSERT INTO Customers VALUES (?, ?, ?)").bind(
+    2,
+    "Name2",
+    "Contact2"
+  ),
 ]);
 ```
 
 ## Database Schema
 
 ### Customers Table
+
 ```sql
 CREATE TABLE Customers (
   CustomerId INTEGER PRIMARY KEY,
@@ -182,6 +206,7 @@ CREATE TABLE Customers (
 ```
 
 ### BlockchainWebhooks Table
+
 ```sql
 CREATE TABLE BlockchainWebhooks (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -193,21 +218,25 @@ CREATE TABLE BlockchainWebhooks (
 ## Security Best Practices
 
 ### Input Validation
+
 - Always validate and sanitize user input before database queries
 - Use prepared statements with parameter binding (NEVER string concatenation)
 - Validate request methods and paths before processing
 
 ### Error Handling
+
 - Log errors with `console.error()` for debugging
 - Never expose sensitive error details in responses to clients
 - Return generic error messages to users
 
 ### Secrets Management
+
 - Use Wrangler secrets for sensitive data (`wrangler secret put SECRET_NAME`)
 - Never commit secrets to version control
 - Access secrets via `env` object in Workers
 
 ### SQL Injection Prevention
+
 ```typescript
 // Secure - use .bind() for parameters
 await env.DB.prepare("SELECT * FROM Users WHERE id = ?").bind(userId).first();
@@ -219,6 +248,7 @@ await env.DB.prepare(`SELECT * FROM Users WHERE id = ${userId}`).first();
 ## Development Workflow
 
 ### Local Development
+
 ```bash
 npm run dev        # Start local development server with Wrangler
 npm test           # Run Vitest tests
@@ -228,34 +258,42 @@ npm run build      # Type-check with TypeScript
 ```
 
 ### Before Committing
+
 1. Run `npm run format` to ensure consistent code style
 2. Run `npm run lint` to catch potential issues
 3. Run `npm run build` to verify TypeScript compilation
 4. Run `npm test` to ensure all tests pass
 
 ### Deployment
+
 ```bash
 npm run deploy     # Deploy to Cloudflare Workers
 ```
+
 The `postdeploy` script automatically runs database migrations.
 
 ## Common Pitfalls and Solutions
 
 ### Issue: D1 database not initialized
+
 **Solution**: Run schema migrations: `wrangler d1 execute DB --file=schema.sql --remote`
 
 ### Issue: TypeScript errors with Worker types
+
 **Solution**: Ensure `@cloudflare/workers-types` version matches compatibility_date in wrangler.jsonc
 
 ### Issue: Tests failing with database errors
+
 **Solution**: Tests run with isolated D1 instances - initialize schema in `beforeAll()`
 
 ### Issue: Module resolution errors
+
 **Solution**: Use `moduleResolution: "Bundler"` in tsconfig.json (already configured)
 
 ## Examples
 
 ### Adding a New API Endpoint
+
 ```typescript
 export default {
   async fetch(request, env): Promise<Response> {
@@ -265,14 +303,19 @@ export default {
       try {
         const { results } = await env.DB.prepare(
           "SELECT column FROM table WHERE condition = ?"
-        ).bind(value).all();
+        )
+          .bind(value)
+          .all();
 
         return Response.json(results, {
           headers: { "Cache-Control": "public, max-age=60" },
         });
       } catch (error) {
         console.error("Query failed:", error);
-        return Response.json({ error: "Failed to fetch data" }, { status: 500 });
+        return Response.json(
+          { error: "Failed to fetch data" },
+          { status: 500 }
+        );
       }
     }
 
@@ -282,6 +325,7 @@ export default {
 ```
 
 ### Adding Tests for New Endpoint
+
 ```typescript
 describe("New endpoint", () => {
   it("returns data successfully", async () => {
@@ -301,6 +345,7 @@ describe("New endpoint", () => {
 ## Model Context Protocol (MCP)
 
 This project is configured with MCP servers for AI tool integration:
+
 - Filesystem server for code access
 - GitHub server for repository integration (requires `GITHUB_TOKEN`)
 
@@ -316,6 +361,7 @@ Configuration is in `.devcontainer/devcontainer.json`.
 ## Questions to Ask
 
 When implementing new features, consider:
+
 1. Does this require a new database table or column?
 2. Are all database queries using prepared statements with `.bind()`?
 3. Have I added appropriate error handling?
