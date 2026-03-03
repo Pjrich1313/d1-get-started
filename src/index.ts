@@ -5,7 +5,7 @@ export default {
     // API key authentication for protected endpoints
     if (pathname.startsWith("/api/")) {
       const apiKey = request.headers.get("X-API-Key");
-      
+
       if (!apiKey || apiKey !== env.API_KEY) {
         return Response.json(
           { error: "Unauthorized - Invalid or missing API key" },
