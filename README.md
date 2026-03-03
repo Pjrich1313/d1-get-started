@@ -36,5 +36,5 @@ pamela demonstrates the basics of working with Cloudflare D1 database in a Worke
 
 ## Documentation
 
-- [Upgrade and Migration Guide](doc/md/Upgrade-and-migration.md) - Learn how to upgrade your Worker, migrate databases, and troubleshoot common issues
-- [Performance Optimizations](PERFORMANCE_OPTIMIZATIONS.md) - Performance improvements and best practices
+- [Upgrade and Migration Guide](doc/md/Upgrade-and-migration.md) - Upgrading dependencies, database schema migrations, environment migrations, rollback procedures, and troubleshooting common issues
+- [Performance Optimizations](PERFORMANCE_OPTIMIZATIONS.md) - Performance improvements and best practices applied to this project
