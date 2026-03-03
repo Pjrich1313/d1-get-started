@@ -108,4 +108,19 @@ describe("D1 Beverages Worker", () => {
     expect(data).toHaveProperty("error");
     expect(data.error).toContain("Unauthorized");
   });
+
+  it("returns digital clock HTML page", async () => {
+    const response = await SELF.fetch("https://example.com/clock");
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toContain("text/html");
+    expect(response.headers.get("Cache-Control")).toBe("public, max-age=3600");
+    const html = await response.text();
+    expect(html).toContain("Digital Clock");
+    expect(html).toContain("America/New_York");
+    expect(html).toContain("Asia/Tokyo");
+    expect(html).toContain("Europe/London");
+    expect(html).toContain('id="clocks"');
+    expect(html).toContain("setInterval");
+  });
 });
