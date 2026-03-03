@@ -2,8 +2,32 @@
 
 This guide covers upgrading your d1-get-started Cloudflare Workers application and migrating between environments.
 
+## Quick Start
+
+For a standard upgrade (updating dependencies and redeploying):
+
+```bash
+# 1. Backup your database
+wrangler d1 export DB --remote --output=backup-$(date +%Y%m%d-%H%M%S).sql
+
+# 2. Update dependencies
+npm update
+
+# 3. Regenerate types
+npm run cf-typegen
+
+# 4. Run tests
+npm test
+
+# 5. Deploy (automatically applies schema.sql via postdeploy script)
+npm run deploy
+```
+
+> **Note:** The `postdeploy` script in `package.json` automatically runs `schema.sql` against your remote D1 database after every deployment.
+
 ## Table of Contents
 
+- [Quick Start](#quick-start)
 - [Identifying Your Current Version](#identifying-your-current-version)
 - [Backup Procedures](#backup-procedures)
 - [Upgrading Your Worker](#upgrading-your-worker)
