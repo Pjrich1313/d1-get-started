@@ -31,5 +31,8 @@
     "typescript-eslint": "^8.54.0",
     "vitest": "~3.0.7",
     "wrangler": "^4.62.0"
+  },
+  "dependencies": {
+    "ethers": "^6.16.0"
   }
 }
