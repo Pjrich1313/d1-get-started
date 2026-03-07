@@ -177,7 +177,9 @@ function abiEncodeUint256(value: bigint): Uint8Array {
 function abiEncodeBytes32(hex: string): Uint8Array {
   const bytes = hexToBytes(hex);
   if (bytes.length !== 32) {
-    throw new Error(`bytes32 must be 32 bytes, got ${bytes.length}`);
+    throw new Error(
+      `bytes32 must be 32 bytes, got ${bytes.length} from hex: ${hex}`
+    );
   }
   return bytes;
 }
@@ -230,7 +232,9 @@ function recoverAddress(msgHash: Uint8Array, signatureHex: string): string {
     : signatureHex;
 
   if (sigHex.length !== 130) {
-    throw new Error(`Invalid signature length: ${sigHex.length} hex chars`);
+    throw new Error(
+      `Invalid signature length: expected 130 hex chars (65 bytes: r||s||v), got ${sigHex.length}`
+    );
   }
 
   const compact = sigHex.slice(0, 128); // r (64) + s (64)

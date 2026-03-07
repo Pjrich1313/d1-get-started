@@ -42,7 +42,10 @@ function concat(...arrays: Uint8Array[]): Uint8Array {
   const total = arrays.reduce((n, a) => n + a.length, 0);
   const out = new Uint8Array(total);
   let offset = 0;
-  for (const a of arrays) { out.set(a, offset); offset += a.length; }
+  for (const a of arrays) {
+    out.set(a, offset);
+    offset += a.length;
+  }
   return out;
 }
 function abiEncodeAddress(addr: string): Uint8Array {
@@ -55,7 +58,10 @@ function abiEncodeAddress(addr: string): Uint8Array {
 function abiEncodeUint256(value: bigint): Uint8Array {
   const out = new Uint8Array(32);
   let n = value;
-  for (let i = 31; i >= 0; i--) { out[i] = Number(n & 0xffn); n >>= 8n; }
+  for (let i = 31; i >= 0; i--) {
+    out[i] = Number(n & 0xffn);
+    n >>= 8n;
+  }
   return out;
 }
 function abiEncodeBytes32(hex: string): Uint8Array {
