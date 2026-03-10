@@ -34,7 +34,7 @@ export default {
         const dataJson = JSON.stringify(webhookData);
 
         // Insert webhook data into the database
-        const result = await env.DB.prepare(
+        const insertResult = await env.DB.prepare(
           "INSERT INTO BlockchainWebhooks (data, timestamp) VALUES (?, ?)"
         )
           .bind(dataJson, timestamp)
@@ -45,7 +45,7 @@ export default {
           {
             success: true,
             message: "Blockchain webhook received and stored for pamela",
-            webhookId: result.meta.last_row_id,
+            webhookId: insertResult.meta.last_row_id,
             timestamp: timestamp,
           },
           { status: 200 }
