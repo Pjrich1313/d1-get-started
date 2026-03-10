@@ -29,6 +29,10 @@ export default {
         // Parse the incoming JSON webhook data
         const webhookData = await request.json();
 
+        // Apply 1-second delay to prevent rapid successive requests
+        // Similar to header delay fix in Ethereum PR #19534
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
         // Store the webhook data in D1 database
         const timestamp = new Date().toISOString();
         const dataJson = JSON.stringify(webhookData);
@@ -44,7 +48,7 @@ export default {
         return Response.json(
           {
             success: true,
-            message: "Blockchain webhook received and stored for pamela",
+            message: "Blockchain webhook received and stored for pamela (delay applied)",
             webhookId: result.meta.last_row_id,
             timestamp: timestamp,
           },
