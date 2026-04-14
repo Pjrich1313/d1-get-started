@@ -4,7 +4,7 @@ import {
   createExecutionContext,
   waitOnExecutionContext,
 } from "cloudflare:test";
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, vi } from "vitest";
 import worker from "../src/blockchain-webhook.js";
 
 // For now, you'll need to do something like this to get a correctly-typed
@@ -80,6 +80,21 @@ describe("Blockchain Webhook Worker", () => {
     expect(data.error).toContain("Method not allowed");
   });
 
+  it("returns default response for non-webhook paths", async () => {
+    const request = new IncomingRequest("http://example.com/other", {
+      method: "POST",
+      body: JSON.stringify({ any: "payload" }),
+    });
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, env, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(200);
+    const text = await response.text();
+    expect(text).toContain("Blockchain Webhook Handler");
+    expect(text).toContain("POST to /webhook");
+  });
+
   it("stores webhook data in the database", async () => {
     const webhookPayload = {
       blockNumber: 11111,
@@ -136,5 +151,41 @@ describe("Blockchain Webhook Worker", () => {
     expect(data.success).toBe(false);
     expect(data.error).toContain("Failed to process blockchain webhook");
     expect(data.error).toContain("pamela");
+  });
+
+  it("returns 500 when database insert fails", async () => {
+    const request = new IncomingRequest("http://example.com/webhook", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ blockNumber: 999 }),
+    });
+    const ctx = createExecutionContext();
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const mockEnv = {
+      ...env,
+      DB: {
+        prepare: () => ({
+          bind: () => ({
+            run: async () => {
+              throw new Error("simulated-insert-failure");
+            },
+          }),
+        }),
+      },
+    };
+
+    const response = await worker.fetch(request, mockEnv, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(500);
+    const data = await response.json();
+    expect(data.success).toBe(false);
+    expect(data.error).toContain("Failed to process blockchain webhook");
+    expect(data.details).toContain("simulated-insert-failure");
+    expect(consoleSpy).toHaveBeenCalled();
+    consoleSpy.mockRestore();
   });
 });

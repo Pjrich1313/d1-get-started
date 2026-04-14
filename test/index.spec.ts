@@ -5,7 +5,7 @@ import {
   waitOnExecutionContext,
   SELF,
 } from "cloudflare:test";
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, vi } from "vitest";
 import worker from "../src/index";
 
 // For now, you'll need to do something like this to get a correctly-typed
@@ -107,6 +107,57 @@ describe("D1 Beverages Worker", () => {
     const data = await response.json();
     expect(data).toHaveProperty("error");
     expect(data.error).toContain("Unauthorized");
+  });
+
+  it("rejects requests to other /api routes without API key", async () => {
+    const response = await SELF.fetch("https://example.com/api/unknown-route");
+
+    expect(response.status).toBe(401);
+    const data = await response.json();
+    expect(data.error).toContain("Unauthorized");
+  });
+
+  it("allows authenticated requests to unknown /api routes and falls back", async () => {
+    const response = await SELF.fetch("https://example.com/api/unknown-route", {
+      headers: { "X-API-Key": "test-api-key-12345" },
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.text()).toMatchInlineSnapshot(
+      `"Call /api/beverages to see everyone who works at Bs Beverages"`
+    );
+  });
+
+  it("returns 500 when beverages database query fails", async () => {
+    const request = new IncomingRequest("http://example.com/api/beverages", {
+      headers: { "X-API-Key": "test-api-key-12345" },
+    });
+    const ctx = createExecutionContext();
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const mockEnv = {
+      ...env,
+      API_KEY: "test-api-key-12345",
+      DB: {
+        prepare: () => ({
+          bind: () => ({
+            all: async () => {
+              throw new Error("simulated-db-error");
+            },
+          }),
+        }),
+      },
+    } as unknown as Env;
+
+    const response = await worker.fetch(request, mockEnv, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toEqual({
+      error: "Failed to fetch beverages data",
+    });
+    expect(consoleSpy).toHaveBeenCalled();
+    consoleSpy.mockRestore();
   });
 
   it("returns digital clock HTML page", async () => {
