@@ -44,6 +44,12 @@ npm run deploy
 
 For detailed security setup instructions, see [API_SECURITY.md](./API_SECURITY.md).
 
+## Copilot and Agent Instructions
+
+- Copilot-specific repository guidance:
+  [.github/copilot-instructions.md](./.github/copilot-instructions.md)
+- General AI coding agent guidance: [AGENTS.md](./AGENTS.md)
+
 ## About pamela
 
 pamela demonstrates the basics of working with Cloudflare D1 database in a Workers environment.
