@@ -175,7 +175,7 @@ describe("Blockchain Webhook Worker", () => {
           }),
         }),
       },
-    };
+    } as unknown as Env;
 
     const response = await worker.fetch(request, mockEnv, ctx);
     await waitOnExecutionContext(ctx);
