@@ -48,6 +48,13 @@ For detailed security setup instructions, see [API_SECURITY.md](./API_SECURITY.m
 
 pamela demonstrates the basics of working with Cloudflare D1 database in a Workers environment.
 
+## AI Agent Guidance
+
+AI coding assistants working in this repository should use the
+repository-specific instructions in
+[`/.github/copilot-instructions.md`](./.github/copilot-instructions.md)
+and [`/AGENTS.md`](./AGENTS.md).
+
 ## Features
 
 - **D1 Database Integration**: Store and query data using Cloudflare's D1 database
