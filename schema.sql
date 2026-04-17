@@ -8,3 +8,16 @@ CREATE TABLE IF NOT EXISTS BlockchainWebhooks (
   data TEXT NOT NULL,
   timestamp TEXT NOT NULL
 );
+
+DROP TABLE IF EXISTS X402Payments;
+CREATE TABLE IF NOT EXISTS X402Payments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  payer TEXT NOT NULL,
+  asset TEXT NOT NULL,
+  network TEXT NOT NULL,
+  amount TEXT NOT NULL,
+  pay_to TEXT NOT NULL,
+  nonce TEXT NOT NULL UNIQUE,
+  method TEXT NOT NULL DEFAULT 'eip3009',
+  created_at TEXT NOT NULL
+);

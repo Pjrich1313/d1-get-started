@@ -125,12 +125,37 @@ const CLOCK_HTML = `<!DOCTYPE html>
 </body>
 </html>`;
 
+import {
+  createPaymentRequirements,
+  parsePaymentHeader,
+  verifyPayment,
+  paymentRequired,
+  paymentAccepted,
+} from "./x402";
+
+// Payment requirements for the /api/premium endpoint.
+// In a real deployment these values would come from env/config.
+const PREMIUM_PAYMENT_REQUIREMENTS = createPaymentRequirements({
+  resource: "/api/premium",
+  description: "Access to premium market data",
+  mimeType: "application/json",
+  // 0.01 USDC (6 decimals)
+  amount: "10000",
+  payTo: "0x209693Bc6afc0C5328bA36FaF03C514EF312287C",
+  asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+  network: "eip155:84532",
+  tokenName: "USDC",
+  tokenVersion: "2",
+  maxTimeoutSeconds: 60,
+});
+
 export default {
   async fetch(request, env): Promise<Response> {
     const { pathname } = new URL(request.url);
 
-    // API key authentication for protected endpoints
-    if (pathname.startsWith("/api/")) {
+    // API key authentication for protected endpoints.
+    // /api/premium is exempt: it uses x402 payment auth instead.
+    if (pathname.startsWith("/api/") && pathname !== "/api/premium") {
       const apiKey = request.headers.get("X-API-Key");
       
       if (!apiKey || apiKey !== env.API_KEY) {
@@ -173,6 +198,84 @@ export default {
           "Content-Type": "text/html; charset=utf-8",
           "Cache-Control": "public, max-age=3600",
         },
+      });
+    }
+
+    // ── x402 payment-protected endpoint ────────────────────────────────────
+    if (pathname === "/api/premium") {
+      const paymentHeader = request.headers.get("X-PAYMENT");
+
+      if (!paymentHeader) {
+        return paymentRequired(PREMIUM_PAYMENT_REQUIREMENTS);
+      }
+
+      // Parse the base64-encoded payment payload from the X-PAYMENT header.
+      const paymentPayload = parsePaymentHeader(paymentHeader);
+      if (!paymentPayload) {
+        return Response.json(
+          { error: "Invalid X-PAYMENT header: could not parse payment payload" },
+          { status: 400 }
+        );
+      }
+
+      // Verify the payment signature and requirements.
+      const result = verifyPayment(paymentPayload, PREMIUM_PAYMENT_REQUIREMENTS);
+      if (!result.success) {
+        return Response.json(
+          { error: `Payment verification failed: ${result.error}` },
+          { status: 402 }
+        );
+      }
+
+      // Replay-attack protection: each nonce may only be used once.
+      try {
+        const existing = await env.DB.prepare(
+          "SELECT id FROM X402Payments WHERE nonce = ?"
+        )
+          .bind(result.nonce)
+          .first();
+
+        if (existing) {
+          return Response.json(
+            { error: "Payment already used (duplicate nonce)" },
+            { status: 402 }
+          );
+        }
+
+        // Record the payment before serving the content.
+        const method = paymentPayload.accepted.extra?.assetTransferMethod ?? "eip3009";
+        await env.DB.prepare(
+          "INSERT INTO X402Payments (payer, asset, network, amount, pay_to, nonce, method, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        )
+          .bind(
+            result.payer,
+            paymentPayload.accepted.asset,
+            paymentPayload.accepted.network,
+            paymentPayload.accepted.amount,
+            PREMIUM_PAYMENT_REQUIREMENTS.payTo,
+            result.nonce,
+            method,
+            new Date().toISOString()
+          )
+          .run();
+      } catch (error) {
+        console.error("Failed to record x402 payment:", error);
+        return Response.json(
+          { error: "Failed to process payment" },
+          { status: 500 }
+        );
+      }
+
+      // Serve the protected premium content.
+      const premiumData = {
+        message: "Welcome to premium content!",
+        data: [
+          { symbol: "BTC", price: "65000.00" },
+          { symbol: "ETH", price: "3500.00" },
+        ],
+      };
+      return paymentAccepted(premiumData, result.payer, {
+        "Cache-Control": "no-store",
       });
     }
 
