@@ -91,15 +91,15 @@ const CLOCK_HTML = `<!DOCTYPE html>
       card.innerHTML =
         '<div class="zone-label">' + tz + '</div>' +
         '<div class="zone-name">' + label + '</div>' +
-        '<div class="time" id="time-' + tz.replace(/\//g, "-") + '"></div>' +
-        '<div class="date" id="date-' + tz.replace(/\//g, "-") + '"></div>';
+        '<div class="time" id="time-' + tz.split("/").join("-") + '"></div>' +
+        '<div class="date" id="date-' + tz.split("/").join("-") + '"></div>';
       container.appendChild(card);
     });
 
     function tick() {
       const now = new Date();
       zones.forEach(({ tz }) => {
-        const id = tz.replace(/\//g, "-");
+        const id = tz.split("/").join("-");
         const timeStr = now.toLocaleTimeString("en-US", {
           timeZone: tz,
           hour: "2-digit",
