@@ -88,18 +88,19 @@ const CLOCK_HTML = `<!DOCTYPE html>
     zones.forEach(({ label, tz }) => {
       const card = document.createElement("div");
       card.className = "clock-card";
+      const safeId = tz.replaceAll("/", "-");
       card.innerHTML =
         '<div class="zone-label">' + tz + '</div>' +
         '<div class="zone-name">' + label + '</div>' +
-        '<div class="time" id="time-' + tz.replace(/\//g, "-") + '"></div>' +
-        '<div class="date" id="date-' + tz.replace(/\//g, "-") + '"></div>';
+        '<div class="time" id="time-' + safeId + '"></div>' +
+        '<div class="date" id="date-' + safeId + '"></div>';
       container.appendChild(card);
     });
 
     function tick() {
       const now = new Date();
       zones.forEach(({ tz }) => {
-        const id = tz.replace(/\//g, "-");
+        const id = tz.replaceAll("/", "-");
         const timeStr = now.toLocaleTimeString("en-US", {
           timeZone: tz,
           hour: "2-digit",
