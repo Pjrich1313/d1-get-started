@@ -91,7 +91,7 @@ describe("D1 Beverages Worker", () => {
 
   it("rejects requests without API key", async () => {
     const response = await SELF.fetch("https://example.com/api/beverages");
-    
+
     expect(response.status).toBe(401);
     const data = await response.json();
     expect(data).toHaveProperty("error");
@@ -102,7 +102,7 @@ describe("D1 Beverages Worker", () => {
     const response = await SELF.fetch("https://example.com/api/beverages", {
       headers: { "X-API-Key": "invalid-key" },
     });
-    
+
     expect(response.status).toBe(401);
     const data = await response.json();
     expect(data).toHaveProperty("error");
