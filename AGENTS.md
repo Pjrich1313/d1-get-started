@@ -77,7 +77,9 @@ export default {
 // ✅ Safe
 const { results } = await env.DB.prepare(
   "SELECT CustomerId, CompanyName FROM Customers WHERE CompanyName = ?"
-).bind("Bs Beverages").all();
+)
+  .bind("Bs Beverages")
+  .all();
 
 // ❌ SQL injection risk — never do this
 const { results } = await env.DB.prepare(
@@ -114,7 +116,9 @@ describe("My feature", () => {
   beforeAll(async () => {
     // Seed the isolated D1 instance
     await env.DB.batch([
-      env.DB.prepare("CREATE TABLE IF NOT EXISTS Customers (CustomerId INTEGER PRIMARY KEY, CompanyName TEXT, ContactName TEXT)"),
+      env.DB.prepare(
+        "CREATE TABLE IF NOT EXISTS Customers (CustomerId INTEGER PRIMARY KEY, CompanyName TEXT, ContactName TEXT)"
+      ),
     ]);
   });
 
@@ -144,6 +148,7 @@ npm test -- test/index.spec.ts
 ## Database Schema
 
 ### Customers
+
 ```sql
 CREATE TABLE Customers (
   CustomerId INTEGER PRIMARY KEY,
@@ -153,6 +158,7 @@ CREATE TABLE Customers (
 ```
 
 ### BlockchainWebhooks
+
 ```sql
 CREATE TABLE BlockchainWebhooks (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
