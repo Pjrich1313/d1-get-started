@@ -3,7 +3,7 @@
   "id": "Pjrich1313/d1-get-started",
   "name": "D1 Get Started",
   "version": "0.0.0",
-  "description": "A Cloudflare Workers starter template demonstrating D1 database integration,\nblockchain webhook handling, and TypeScript data structure implementations.\nIncludes AI coding-agent instructions for GitHub Copilot and Codex covering\nproject conventions, D1 query patterns, API security, testing, and deployment.",
+  "description": "A Cloudflare Workers starter template demonstrating D1 database integration, blockchain webhook handling, and TypeScript data structure implementations. Includes AI coding-agent instructions for GitHub Copilot and Codex covering project conventions, D1 query patterns, API security, testing, and deployment.",
   "creator": "Pjrich1313",
   "homepage": "https://github.com/Pjrich1313/d1-get-started",
   "repository": "https://github.com/Pjrich1313/d1-get-started",
