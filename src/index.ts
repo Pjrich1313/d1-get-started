@@ -91,15 +91,15 @@ const CLOCK_HTML = `<!DOCTYPE html>
       card.innerHTML =
         '<div class="zone-label">' + tz + '</div>' +
         '<div class="zone-name">' + label + '</div>' +
-        '<div class="time" id="time-' + tz.replace(/\//g, "-") + '"></div>' +
-        '<div class="date" id="date-' + tz.replace(/\//g, "-") + '"></div>';
+        '<div class="time" id="time-' + tz.replaceAll("/", "-") + '"></div>' +
+        '<div class="date" id="date-' + tz.replaceAll("/", "-") + '"></div>';
       container.appendChild(card);
     });
 
     function tick() {
       const now = new Date();
       zones.forEach(({ tz }) => {
-        const id = tz.replace(/\//g, "-");
+        const id = tz.replaceAll("/", "-");
         const timeStr = now.toLocaleTimeString("en-US", {
           timeZone: tz,
           hour: "2-digit",
@@ -132,7 +132,7 @@ export default {
     // API key authentication for protected endpoints
     if (pathname.startsWith("/api/")) {
       const apiKey = request.headers.get("X-API-Key");
-      
+
       if (!apiKey || apiKey !== env.API_KEY) {
         return Response.json(
           { error: "Unauthorized - Invalid or missing API key" },
