@@ -1,5 +1,5 @@
 export default {
-  async fetch(): Promise<Response> {
+  async fetch(_request, _env): Promise<Response> {
     return Response.json(
       { error: "Unauthorized - interaction is disabled" },
       { status: 401 }
