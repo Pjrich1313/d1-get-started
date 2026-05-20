@@ -24,6 +24,17 @@ npm install
 npm run dev
 ```
 
+### Validate Before Review
+
+Run these checks before opening or updating a PR:
+
+```bash
+npm run format:check
+npm run lint
+npm run build
+npm test
+```
+
 ### Deployment
 
 Before deploying, make sure to set up your API key secret:
