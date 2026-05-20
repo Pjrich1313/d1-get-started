@@ -15,7 +15,11 @@ describe("D1 Beverages Worker", () => {
   it("returns unauthorized for root path (unit style)", async () => {
     const request = new IncomingRequest("http://example.com");
     const ctx = createExecutionContext();
-    const response = await worker.fetch(request, {} as Env, ctx);
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: undefined,
+    } as unknown as Env;
+    const response = await worker.fetch(request, mockEnv, ctx);
     await waitOnExecutionContext(ctx);
 
     expect(response.status).toBe(401);
