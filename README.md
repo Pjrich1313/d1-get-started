@@ -42,6 +42,14 @@ Then deploy:
 npm run deploy
 ```
 
+Note: `npm run deploy` triggers a D1 schema migration via the `postdeploy` hook.
+In non-interactive environments, set `CLOUDFLARE_API_TOKEN` (for Wrangler) or run
+the migration manually:
+
+```bash
+wrangler d1 execute DB --file=schema.sql --remote
+```
+
 For detailed security setup instructions, see [API_SECURITY.md](./API_SECURITY.md).
 
 ## Copilot and Agent Instructions

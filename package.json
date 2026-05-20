@@ -16,7 +16,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,json,md}\"",
     "cf-typegen": "wrangler types",
-    "postdeploy": "wrangler d1 execute DB --file=schema.sql --remote"
+    "postdeploy": "node ./scripts/postdeploy.mjs"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.12.8",
