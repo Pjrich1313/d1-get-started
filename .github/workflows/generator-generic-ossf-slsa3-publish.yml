@@ -32,8 +32,10 @@ jobs:
       # ========================================================
       - name: Call all placeholders
         run: |
+          placeholderArtifacts="artifact1 artifact2"
+          echo "PLACEHOLDER_ARTIFACTS=$placeholderArtifacts" >> "${GITHUB_ENV}"
           # These are some amazing artifacts.
-          for placeholder in artifact1 artifact2; do
+          for placeholder in $placeholderArtifacts; do
             echo "$placeholder" > "$placeholder"
           done
 
@@ -51,7 +53,7 @@ jobs:
           set -euo pipefail
 
           # List the artifacts the provenance will refer to.
-          files="artifact1 artifact2"
+          files="$PLACEHOLDER_ARTIFACTS"
           # Generate the subjects (base64 encoded).
           echo "digests=$(sha256sum $files | base64 -w0)" >> "${GITHUB_OUTPUT}"
 
