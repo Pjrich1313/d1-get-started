@@ -47,12 +47,12 @@ describe("D1 Beverages Worker", () => {
     });
   });
 
-  it("returns unauthorized for non-api routes", async () => {
+  it("returns digital clock page for /clock", async () => {
     const response = await SELF.fetch("https://example.com/clock");
 
-    expect(response.status).toBe(401);
-    await expect(response.json()).resolves.toEqual({
-      error: "Unauthorized - interaction is disabled",
-    });
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toContain("text/html");
+    const html = await response.text();
+    expect(html).toContain("Digital Clock");
   });
 });
