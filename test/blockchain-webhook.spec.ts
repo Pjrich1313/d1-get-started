@@ -185,7 +185,7 @@ describe("Blockchain Webhook Worker", () => {
     expect(data.success).toBe(false);
     expect(data.error).toContain("Failed to process blockchain webhook");
     expect(data).toHaveProperty("details");
-    expect(data.details).toContain("simulated-insert-failure");
+    expect(data.details).toBe("POW");
     expect(consoleSpy).toHaveBeenCalled();
     consoleSpy.mockRestore();
   });
