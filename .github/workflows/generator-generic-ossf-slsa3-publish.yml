@@ -21,6 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       digests: ${{ steps.hash.outputs.digests }}
+      hashes: ${{ steps.hash.outputs.digests }}
 
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +31,7 @@ jobs:
       # Step 1: Build your artifacts.
       #
       # ========================================================
-      - name: Generate placeholder artifacts (call all placeholders)
+      - name: Generate artifacts from placeholder list (call all placeholders)
         run: |
           artifactList="artifact1 artifact2"
           echo "PLACEHOLDER_ARTIFACTS=$artifactList" >> "${GITHUB_ENV}"
@@ -53,7 +54,7 @@ jobs:
           set -euo pipefail
 
           # List the artifacts the provenance will refer to.
-          files="$PLACEHOLDER_ARTIFACTS"
+          files="${PLACEHOLDER_ARTIFACTS}"
           # Generate the subjects (base64 encoded).
           echo "digests=$(sha256sum $files | base64 -w0)" >> "${GITHUB_OUTPUT}"
 
