@@ -18,21 +18,21 @@ The guard mechanism provides a programmatic way to control whether instances of 
 ### Basic Usage
 
 ```typescript
-import { getProjectName, applyProjectNameGuard } from './config';
+import { getProjectName, applyProjectNameGuard } from "./config";
 
 // Get the current project name (defaults to 'pamela' when guard is enabled)
 const name = getProjectName();
 console.log(name); // 'pamela'
 
 // Apply guard to text containing the original name
-const message = applyProjectNameGuard('Welcome to My Cool Project!');
+const message = applyProjectNameGuard("Welcome to My Cool Project!");
 console.log(message); // 'Welcome to pamela!'
 ```
 
 ### Toggling the Guard
 
 ```typescript
-import { enableGuard, disableGuard, isGuardEnabled } from './config';
+import { enableGuard, disableGuard, isGuardEnabled } from "./config";
 
 // Disable guard for testing original behavior
 disableGuard();
@@ -44,20 +44,20 @@ console.log(getProjectName()); // 'pamela'
 
 // Check current state
 if (isGuardEnabled()) {
-  console.log('Guard is active');
+  console.log("Guard is active");
 }
 ```
 
 ### Custom Configuration
 
 ```typescript
-import { setGuardConfig, getGuardConfig } from './config';
+import { setGuardConfig, getGuardConfig } from "./config";
 
 // Set custom names for specific use cases
 setGuardConfig({
-  originalName: 'OldProjectName',
-  replacementName: 'NewProjectName',
-  enabled: true
+  originalName: "OldProjectName",
+  replacementName: "NewProjectName",
+  enabled: true,
 });
 
 // Get current configuration
@@ -69,7 +69,7 @@ console.log(config);
 ### Reset to Default
 
 ```typescript
-import { resetGuard } from './config';
+import { resetGuard } from "./config";
 
 // After making temporary changes, reset to defaults
 resetGuard();
@@ -80,30 +80,40 @@ resetGuard();
 ### Functions
 
 #### `getProjectName(): string`
+
 Returns the current project name based on guard configuration.
+
 - Returns replacement name when guard is enabled
 - Returns original name when guard is disabled
 
 #### `enableGuard(): void`
+
 Enables the guard mechanism to use the replacement name.
 
 #### `disableGuard(): void`
+
 Disables the guard mechanism to use the original name.
 
 #### `isGuardEnabled(): boolean`
+
 Checks if the guard is currently enabled.
 
 #### `setGuardConfig(config: Partial<ProjectNameGuard>): void`
+
 Updates the guard configuration. Accepts partial configuration object.
 
 #### `getGuardConfig(): Readonly<ProjectNameGuard>`
+
 Returns a copy of the current guard configuration.
 
 #### `resetGuard(): void`
+
 Resets the guard to its default configuration.
 
 #### `applyProjectNameGuard(text: string): string`
+
 Applies the guard mechanism to replace project names in text.
+
 - When enabled: replaces all instances of original name with replacement name
 - When disabled: returns text unchanged
 
@@ -118,22 +128,21 @@ npm test
 ## Example: Debugging with Guard
 
 ```typescript
-import { setGuardConfig, resetGuard } from './config';
+import { setGuardConfig, resetGuard } from "./config";
 
 // Save original config
 const originalConfig = getGuardConfig();
 
 try {
   // Temporarily change for debugging
-  setGuardConfig({ 
-    replacementName: 'DEBUG_MODE',
-    enabled: true 
+  setGuardConfig({
+    replacementName: "DEBUG_MODE",
+    enabled: true,
   });
-  
+
   // Your debugging code here
-  const message = applyProjectNameGuard('Running My Cool Project');
+  const message = applyProjectNameGuard("Running My Cool Project");
   console.log(message); // 'Running DEBUG_MODE'
-  
 } finally {
   // Restore original configuration
   resetGuard();
@@ -150,6 +159,7 @@ The guard is integrated into the Cloudflare Worker to demonstrate its usage:
 ```
 
 Example:
+
 ```bash
 # With guard enabled (default)
 curl https://your-worker.workers.dev/api/project-name

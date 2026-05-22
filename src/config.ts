@@ -17,8 +17,8 @@ interface ProjectNameGuard {
  */
 const defaultGuard: ProjectNameGuard = {
   enabled: true,
-  originalName: 'My Cool Project',
-  replacementName: 'pamela',
+  originalName: "My Cool Project",
+  replacementName: "pamela",
 };
 
 /**
@@ -31,8 +31,8 @@ let currentGuard: ProjectNameGuard = { ...defaultGuard };
  * @returns The project name (either original or replacement based on guard state)
  */
 export function getProjectName(): string {
-  return currentGuard.enabled 
-    ? currentGuard.replacementName 
+  return currentGuard.enabled
+    ? currentGuard.replacementName
     : currentGuard.originalName;
 }
 
@@ -87,7 +87,7 @@ export function resetGuard(): void {
 export function applyProjectNameGuard(text: string): string {
   if (currentGuard.enabled) {
     return text.replace(
-      new RegExp(currentGuard.originalName, 'g'),
+      new RegExp(currentGuard.originalName, "g"),
       currentGuard.replacementName
     );
   }
