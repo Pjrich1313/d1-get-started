@@ -30,11 +30,12 @@ jobs:
       # Step 1: Build your artifacts.
       #
       # ========================================================
-      - name: Build artifacts
+      - name: Call all placeholders
         run: |
-            # These are some amazing artifacts.
-            echo "artifact1" > artifact1
-            echo "artifact2" > artifact2
+          # These are some amazing artifacts.
+          for placeholder in artifact1 artifact2; do
+            echo "$placeholder" > "$placeholder"
+          done
 
       # ========================================================
       #
@@ -50,9 +51,9 @@ jobs:
           set -euo pipefail
 
           # List the artifacts the provenance will refer to.
-          files=$(ls artifact*)
+          files="artifact1 artifact2"
           # Generate the subjects (base64 encoded).
-          echo "hashes=$(sha256sum $files | base64 -w0)" >> "${GITHUB_OUTPUT}"
+          echo "digests=$(sha256sum $files | base64 -w0)" >> "${GITHUB_OUTPUT}"
 
   provenance:
     needs: [build]
