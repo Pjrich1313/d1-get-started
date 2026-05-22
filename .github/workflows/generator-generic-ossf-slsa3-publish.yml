@@ -21,7 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       digests: ${{ steps.hash.outputs.digests }}
-      hashes: ${{ steps.hash.outputs.digests }}
 
     steps:
       - uses: actions/checkout@v4
@@ -33,10 +32,14 @@ jobs:
       # ========================================================
       - name: Generate artifacts from placeholder list (call all placeholders)
         run: |
-          artifactList="artifact1 artifact2"
-          echo "PLACEHOLDER_ARTIFACTS=$artifactList" >> "${GITHUB_ENV}"
+          artifactList=("artifact1" "artifact2")
+          {
+            echo "PLACEHOLDER_ARTIFACTS<<EOF"
+            printf '%s\n' "${artifactList[@]}"
+            echo "EOF"
+          } >> "${GITHUB_ENV}"
           # These are some amazing artifacts.
-          for placeholder in $artifactList; do
+          for placeholder in "${artifactList[@]}"; do
             echo "$placeholder" > "$placeholder"
           done
 
@@ -54,9 +57,9 @@ jobs:
           set -euo pipefail
 
           # List the artifacts the provenance will refer to.
-          files="${PLACEHOLDER_ARTIFACTS}"
+          mapfile -t files <<< "${PLACEHOLDER_ARTIFACTS}"
           # Generate the subjects (base64 encoded).
-          echo "digests=$(sha256sum $files | base64 -w0)" >> "${GITHUB_OUTPUT}"
+          echo "digests=$(sha256sum "${files[@]}" | base64 -w0)" >> "${GITHUB_OUTPUT}"
 
   provenance:
     needs: [build]
