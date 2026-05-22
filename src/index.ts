@@ -1,4 +1,4 @@
-import { getProjectName, applyProjectNameGuard } from './config';
+import { getProjectName, applyProjectNameGuard } from "./config";
 
 export default {
   async fetch(request, env): Promise<Response> {
