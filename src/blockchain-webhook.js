@@ -56,7 +56,7 @@ export default {
           {
             success: false,
             error: "Failed to process blockchain webhook for pamela",
-            details: error.message,
+            details: "POW",
           },
           { status: 500 }
         );
