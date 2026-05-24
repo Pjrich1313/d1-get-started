@@ -1,10 +1,9 @@
 // test/blockchain-webhook.spec.ts
 import {
-  env,
   createExecutionContext,
   waitOnExecutionContext,
 } from "cloudflare:test";
-import { describe, it, expect, beforeAll, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import worker from "../src/blockchain-webhook.js";
 
 // For now, you'll need to do something like this to get a correctly-typed
@@ -12,181 +11,77 @@ import worker from "../src/blockchain-webhook.js";
 const IncomingRequest = Request<unknown, IncomingRequestCfProperties>;
 
 describe("Blockchain Webhook Worker", () => {
-  beforeAll(async () => {
-    // Initialize the database with the BlockchainWebhooks table
-    await env.DB.batch([
-      env.DB.prepare(`DROP TABLE IF EXISTS BlockchainWebhooks`),
-      env.DB.prepare(
-        `CREATE TABLE IF NOT EXISTS BlockchainWebhooks (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          data TEXT NOT NULL,
-          timestamp TEXT NOT NULL
-        )`
-      ),
-    ]);
-  });
-
-  it("responds with default message for root path (unit style)", async () => {
+  it("returns unauthorized for root path", async () => {
     const request = new IncomingRequest("http://example.com");
     const ctx = createExecutionContext();
-    const response = await worker.fetch(request, env, ctx);
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: undefined,
+    } as unknown as Env;
+    const response = await worker.fetch(request, mockEnv, ctx);
     await waitOnExecutionContext(ctx);
-    const text = await response.text();
-    expect(text).toContain("Blockchain Webhook Handler");
-    expect(text).toContain("pamela");
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({
+      error: "Unauthorized - interaction is disabled",
+    });
   });
 
-  it("successfully handles POST request with blockchain data (unit style)", async () => {
-    const webhookPayload = {
-      blockNumber: 12345,
-      transactionHash: "0xabc123def456",
-      from: "0x1234567890abcdef",
-      to: "0xfedcba0987654321",
-      value: "1000000000000000000",
-    };
-
+  it("returns unauthorized for webhook POST requests", async () => {
     const request = new IncomingRequest("http://example.com/webhook", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(webhookPayload),
+      body: JSON.stringify({ blockNumber: 12345 }),
     });
 
     const ctx = createExecutionContext();
-    const response = await worker.fetch(request, env, ctx);
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: undefined,
+    } as unknown as Env;
+    const response = await worker.fetch(request, mockEnv, ctx);
     await waitOnExecutionContext(ctx);
 
-    expect(response.status).toBe(200);
-    const data = await response.json();
-    expect(data.success).toBe(true);
-    expect(data.message).toContain("pamela");
-    expect(data.message).toContain("Blockchain webhook received and stored");
-    expect(data).toHaveProperty("webhookId");
-    expect(data).toHaveProperty("timestamp");
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({
+      error: "Unauthorized - interaction is disabled",
+    });
   });
 
-  it("returns 405 for non-POST requests to /webhook", async () => {
+  it("returns unauthorized for webhook GET requests", async () => {
     const request = new IncomingRequest("http://example.com/webhook", {
       method: "GET",
     });
     const ctx = createExecutionContext();
-    const response = await worker.fetch(request, env, ctx);
-    await waitOnExecutionContext(ctx);
-
-    expect(response.status).toBe(405);
-    const data = await response.json();
-    expect(data).toHaveProperty("error");
-    expect(data.error).toContain("Method not allowed");
-  });
-
-  it("returns default response for non-webhook paths", async () => {
-    const request = new IncomingRequest("http://example.com/other", {
-      method: "POST",
-      body: JSON.stringify({ any: "payload" }),
-    });
-    const ctx = createExecutionContext();
-    const response = await worker.fetch(request, env, ctx);
-    await waitOnExecutionContext(ctx);
-
-    expect(response.status).toBe(200);
-    const text = await response.text();
-    expect(text).toContain("Blockchain Webhook Handler");
-    expect(text).toContain("POST to /webhook");
-  });
-
-  it("stores webhook data in the database", async () => {
-    const webhookPayload = {
-      blockNumber: 11111,
-      transactionHash: "0xtest123",
-      eventType: "transfer",
-    };
-
-    const request = new IncomingRequest("http://example.com/webhook", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(webhookPayload),
-    });
-
-    const ctx = createExecutionContext();
-    const response = await worker.fetch(request, env, ctx);
-    await waitOnExecutionContext(ctx);
-
-    const data = await response.json();
-    const webhookId = data.webhookId;
-
-    // Query the database to verify the data was stored
-    const { results } = await env.DB.prepare(
-      "SELECT * FROM BlockchainWebhooks WHERE id = ?"
-    )
-      .bind(webhookId)
-      .all();
-
-    expect(results.length).toBe(1);
-    expect(results[0]).toHaveProperty("data");
-    expect(results[0]).toHaveProperty("timestamp");
-
-    const storedData = JSON.parse(results[0].data);
-    expect(storedData.blockNumber).toBe(11111);
-    expect(storedData.transactionHash).toBe("0xtest123");
-  });
-
-  it("handles invalid JSON gracefully", async () => {
-    const request = new IncomingRequest("http://example.com/webhook", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: "invalid json {",
-    });
-
-    const ctx = createExecutionContext();
-    const response = await worker.fetch(request, env, ctx);
-    await waitOnExecutionContext(ctx);
-
-    expect(response.status).toBe(500);
-    const data = await response.json();
-    expect(data.success).toBe(false);
-    expect(data.error).toContain("Failed to process blockchain webhook");
-    expect(data.error).toContain("pamela");
-  });
-
-  it("returns 500 when database insert fails", async () => {
-    const request = new IncomingRequest("http://example.com/webhook", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ blockNumber: 999 }),
-    });
-    const ctx = createExecutionContext();
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
     const mockEnv = {
-      ...env,
-      DB: {
-        prepare: () => ({
-          bind: () => ({
-            run: async () => {
-              throw new Error("simulated-insert-failure");
-            },
-          }),
-        }),
-      },
+      API_KEY: "test-api-key-12345",
+      DB: undefined,
     } as unknown as Env;
-
     const response = await worker.fetch(request, mockEnv, ctx);
     await waitOnExecutionContext(ctx);
 
-    expect(response.status).toBe(500);
-    const data = await response.json();
-    expect(data.success).toBe(false);
-    expect(data.error).toContain("Failed to process blockchain webhook");
-    expect(data).toHaveProperty("details");
-    expect(data.details).toBe("POW");
-    expect(consoleSpy).toHaveBeenCalled();
-    consoleSpy.mockRestore();
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({
+      error: "Unauthorized - interaction is disabled",
+    });
+  });
+
+  it("returns unauthorized for non-webhook paths", async () => {
+    const request = new IncomingRequest("http://example.com/other", {
+      method: "GET",
+    });
+    const ctx = createExecutionContext();
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: undefined,
+    } as unknown as Env;
+    const response = await worker.fetch(request, mockEnv, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({
+      error: "Unauthorized - interaction is disabled",
+    });
   });
 });
