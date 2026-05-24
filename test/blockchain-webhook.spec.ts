@@ -11,13 +11,14 @@ import worker from "../src/blockchain-webhook.js";
 const IncomingRequest = Request<unknown, IncomingRequestCfProperties>;
 
 describe("Blockchain Webhook Worker", () => {
+  const mockEnv = {
+    API_KEY: "test-api-key-12345",
+    DB: undefined,
+  } as unknown as Env;
+
   it("returns unauthorized for root path", async () => {
     const request = new IncomingRequest("http://example.com");
     const ctx = createExecutionContext();
-    const mockEnv = {
-      API_KEY: "test-api-key-12345",
-      DB: undefined,
-    } as unknown as Env;
     const response = await worker.fetch(request, mockEnv, ctx);
     await waitOnExecutionContext(ctx);
     expect(response.status).toBe(401);
@@ -36,10 +37,6 @@ describe("Blockchain Webhook Worker", () => {
     });
 
     const ctx = createExecutionContext();
-    const mockEnv = {
-      API_KEY: "test-api-key-12345",
-      DB: undefined,
-    } as unknown as Env;
     const response = await worker.fetch(request, mockEnv, ctx);
     await waitOnExecutionContext(ctx);
 
@@ -54,10 +51,6 @@ describe("Blockchain Webhook Worker", () => {
       method: "GET",
     });
     const ctx = createExecutionContext();
-    const mockEnv = {
-      API_KEY: "test-api-key-12345",
-      DB: undefined,
-    } as unknown as Env;
     const response = await worker.fetch(request, mockEnv, ctx);
     await waitOnExecutionContext(ctx);
 
@@ -72,10 +65,6 @@ describe("Blockchain Webhook Worker", () => {
       method: "GET",
     });
     const ctx = createExecutionContext();
-    const mockEnv = {
-      API_KEY: "test-api-key-12345",
-      DB: undefined,
-    } as unknown as Env;
     const response = await worker.fetch(request, mockEnv, ctx);
     await waitOnExecutionContext(ctx);
 
