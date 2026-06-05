@@ -11,8 +11,7 @@ export default {
         );
       }
 
-      const sinceDate =
-        url.searchParams.get("since") ?? "2024-01-01T00:00:00";
+      const sinceDate = url.searchParams.get("since") ?? "2024-01-01T00:00:00";
 
       try {
         const { results } = await env.DB.prepare(
