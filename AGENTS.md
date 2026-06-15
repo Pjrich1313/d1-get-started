@@ -49,6 +49,15 @@ wrangler.jsonc          - Wrangler configuration (bindings, compatibility)
 worker-configuration.d.ts - Auto-generated Worker environment types
 ```
 
+## Available Routes
+
+| Route                | Auth Required     | Description                                        |
+| :------------------- | :---------------- | :------------------------------------------------- |
+| `GET /`              | No                | Usage instructions (default response)              |
+| `GET /api/beverages` | Yes (`X-API-Key`) | Returns Customers rows for "Bs Beverages"          |
+| `GET /clock`         | No                | Self-contained HTML digital clock (10 time zones)  |
+| `POST /webhook`      | No                | Blockchain event ingestion (blockchain-webhook.js) |
+
 ## Code Conventions
 
 - **Indentation**: 2 spaces, no tabs
@@ -174,9 +183,40 @@ wrangler d1 execute DB --file=schema.sql          # local
 wrangler d1 execute DB --file=schema.sql --remote  # production
 ```
 
+## Common Pitfalls
+
+### Issue: D1 database not initialized
+
+**Solution**: Run schema migrations: `wrangler d1 execute DB --file=schema.sql --remote`
+
+### Issue: TypeScript errors with Worker types
+
+**Solution**: Ensure `@cloudflare/workers-types` version matches `compatibility_date` in
+`wrangler.jsonc`
+
+### Issue: Tests failing with database errors
+
+**Solution**: Tests run with isolated D1 instances — initialize schema in `beforeAll()`
+
+### Issue: Module resolution errors
+
+**Solution**: Use `moduleResolution: "Bundler"` in `tsconfig.json` (already configured)
+
+### Issue: API requests returning 401
+
+**Solution**: Supply the `X-API-Key` header for all `/api/` routes; set the secret with
+`wrangler secret put API_KEY`
+
 ## Before Committing
 
 1. `npm run format` — fix code style
 2. `npm run lint` — catch linting errors
 3. `npm run build` — verify TypeScript compiles
 4. `npm test` — ensure all tests pass
+
+## Additional Resources
+
+- [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
+- [D1 Database Documentation](https://developers.cloudflare.com/d1/)
+- [Wrangler CLI Documentation](https://developers.cloudflare.com/workers/wrangler/)
+- [Vitest Documentation](https://vitest.dev/)
