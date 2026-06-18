@@ -86,10 +86,11 @@ export function resetGuard(): void {
  */
 export function applyProjectNameGuard(text: string): string {
   if (currentGuard.enabled) {
-    return text.replace(
-      new RegExp(currentGuard.originalName, "g"),
-      currentGuard.replacementName
+    const escaped = currentGuard.originalName.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      "\\$&"
     );
+    return text.replace(new RegExp(escaped, "g"), currentGuard.replacementName);
   }
   return text;
 }

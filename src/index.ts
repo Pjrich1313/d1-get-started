@@ -1,6 +1,5 @@
-<<<<<<< HEAD
 import { getProjectName, applyProjectNameGuard } from "./config";
-=======
+
 const CLOCK_HTML = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -127,37 +126,18 @@ const CLOCK_HTML = `<!DOCTYPE html>
   </script>
 </body>
 </html>`;
->>>>>>> main
 
 export default {
   async fetch(request, env): Promise<Response> {
     const { pathname } = new URL(request.url);
 
-<<<<<<< HEAD
-    if (pathname === "/api/beverages") {
-      // If you did not use `DB` as your binding name, change it here
-      const { results } = await env.DB.prepare(
-        "SELECT * FROM Customers WHERE CompanyName = ?"
-      )
-        .bind("Bs Beverages")
-        .all();
-      return Response.json(results);
-    }
-
-    if (pathname === "/api/project-name") {
-      return Response.json({ projectName: getProjectName() });
-    }
-
-    const welcomeMessage = applyProjectNameGuard(
-      "Welcome to My Cool Project! Call /api/beverages to see everyone who works at Bs Beverages, or /api/project-name to see the current project name."
-=======
     // API key authentication for protected endpoints
     if (pathname.startsWith("/api/")) {
       const apiKey = request.headers.get("X-API-Key");
-      
+
       if (!apiKey || apiKey !== env.API_KEY) {
         return Response.json(
-          { error: "Unauthorized - Invalid or missing API key" },
+          { error: "Unauthorized - invalid or missing API key" },
           { status: 401 }
         );
       }
@@ -165,28 +145,48 @@ export default {
 
     if (pathname === "/api/beverages") {
       try {
-        // Optimized: Select only needed columns instead of SELECT *
-        // This reduces data transfer and improves query performance
         const { results } = await env.DB.prepare(
           "SELECT CustomerId, CompanyName, ContactName FROM Customers WHERE CompanyName = ?"
         )
           .bind("Bs Beverages")
           .all();
 
-        // Add cache headers for better performance
         return Response.json(results, {
           headers: {
             "Cache-Control": "public, max-age=60",
           },
         });
       } catch (error) {
-        // Proper error handling for database failures
         console.error("Database query failed:", error);
         return Response.json(
           { error: "Failed to fetch beverages data" },
           { status: 500 }
         );
       }
+    }
+
+    if (pathname === "/api/landmarks") {
+      const { searchParams } = new URL(request.url);
+      const sinceDate = searchParams.get("since") ?? "2024-01-01T00:00:00";
+
+      try {
+        const { results } = await env.DB.prepare(
+          "SELECT id, name, location, description, created_at FROM Landmarks WHERE created_at >= ? ORDER BY created_at ASC"
+        )
+          .bind(sinceDate)
+          .all();
+
+        return Response.json({ landmarks: results });
+      } catch {
+        return Response.json(
+          { error: "Internal server error" },
+          { status: 500 }
+        );
+      }
+    }
+
+    if (pathname === "/api/project-name") {
+      return Response.json({ projectName: getProjectName() });
     }
 
     if (pathname === "/clock") {
@@ -198,9 +198,8 @@ export default {
       });
     }
 
-    return new Response(
-      "Call /api/beverages to see everyone who works at Bs Beverages"
->>>>>>> main
+    const welcomeMessage = applyProjectNameGuard(
+      "Welcome to My Cool Project! Call /api/beverages to see everyone who works at Bs Beverages, or /api/project-name to see the current project name."
     );
 
     return new Response(welcomeMessage);

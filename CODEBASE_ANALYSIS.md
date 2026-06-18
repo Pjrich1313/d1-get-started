@@ -9,6 +9,7 @@ Your repositories showcase a diverse tech stack spanning **cloud infrastructure,
 ## 1. **d1-get-started** (Pamela - Cloudflare Workers + D1 Database)
 
 ### Project Summary
+
 - **Purpose**: Starter template for Cloudflare Workers with D1 database integration
 - **Tech Stack**: TypeScript, Cloudflare Workers, D1 (SQLite), Vitest, Wrangler
 - **Language Composition**: 94.4% TypeScript, 5.6% JavaScript
@@ -16,6 +17,7 @@ Your repositories showcase a diverse tech stack spanning **cloud infrastructure,
 - **Deploy Status**: Live at https://v0-d1-get-started.vercel.app
 
 ### Strengths
+
 ✅ Well-structured configuration (TypeScript strict mode, ESLint, Prettier)
 ✅ Comprehensive security documentation (API_SECURITY.md, blockchain guides)
 ✅ Clear agent instructions and MCP server support
@@ -23,6 +25,7 @@ Your repositories showcase a diverse tech stack spanning **cloud infrastructure,
 ✅ Follows best practices: prepared statements, error handling, caching
 
 ### Architecture
+
 ```
 d1-get-started/
 ├── src/
@@ -39,6 +42,7 @@ d1-get-started/
 ### Code Quality Improvements
 
 #### 1. Error Handling Standardization
+
 ```typescript
 // lib/errors.ts
 export class ApiError extends Error {
@@ -54,7 +58,10 @@ export class ApiError extends Error {
 }
 
 export class ValidationError extends ApiError {
-  constructor(message: string, public errors: Record<string, string>) {
+  constructor(
+    message: string,
+    public errors: Record<string, string>
+  ) {
     super(400, "VALIDATION_ERROR", message);
   }
 }
@@ -78,13 +85,19 @@ export function handleError(error: unknown): Response {
   }
 
   return Response.json(
-    { error: { code: "INTERNAL_SERVER_ERROR", message: "An unexpected error occurred" } },
+    {
+      error: {
+        code: "INTERNAL_SERVER_ERROR",
+        message: "An unexpected error occurred",
+      },
+    },
     { status: 500 }
   );
 }
 ```
 
 #### 2. Request Validation with Zod
+
 ```typescript
 // lib/schemas.ts
 import { z } from "zod";
@@ -103,15 +116,15 @@ const { results } = await env.DB.prepare(
 ```
 
 #### 3. Service Layer Pattern
+
 ```typescript
 // src/services/beverageService.ts
 export class BeverageService {
   constructor(private db: D1Database) {}
 
   async getBeveragesByCompany(companyName: string, limit: number = 10) {
-    return this.db.prepare(
-      "SELECT * FROM Beverages WHERE CompanyName = ? LIMIT ?"
-    )
+    return this.db
+      .prepare("SELECT * FROM Beverages WHERE CompanyName = ? LIMIT ?")
       .bind(companyName, limit)
       .all();
   }
@@ -119,6 +132,7 @@ export class BeverageService {
 ```
 
 #### 4. Rate Limiting Middleware
+
 ```typescript
 // src/middleware/rateLimit.ts
 const requestCounts = new Map<string, { count: number; resetTime: number }>();
@@ -143,21 +157,32 @@ export function checkRateLimit(
 ```
 
 #### 5. Structured Logging
+
 ```typescript
 // src/utils/logger.ts
-enum LogLevel { DEBUG = 0, INFO = 1, WARN = 2, ERROR = 3 }
+enum LogLevel {
+  DEBUG = 0,
+  INFO = 1,
+  WARN = 2,
+  ERROR = 3,
+}
 
 class Logger {
-  constructor(private context: string, private level: LogLevel = LogLevel.INFO) {}
+  constructor(
+    private context: string,
+    private level: LogLevel = LogLevel.INFO
+  ) {}
 
   error(message: string, error?: unknown) {
-    console.error(JSON.stringify({
-      timestamp: new Date().toISOString(),
-      level: "ERROR",
-      context: this.context,
-      message,
-      error: error instanceof Error ? error.message : error,
-    }));
+    console.error(
+      JSON.stringify({
+        timestamp: new Date().toISOString(),
+        level: "ERROR",
+        context: this.context,
+        message,
+        error: error instanceof Error ? error.message : error,
+      })
+    );
   }
 }
 
@@ -167,6 +192,7 @@ export function createLogger(context: string) {
 ```
 
 #### 6. Health Check Endpoint
+
 ```typescript
 // src/health.ts
 export async function checkDatabaseHealth(env: Env): Promise<boolean> {
@@ -182,26 +208,31 @@ export async function checkDatabaseHealth(env: Env): Promise<boolean> {
 // In index.ts
 if (pathname === "/health") {
   const isHealthy = await checkDatabaseHealth(env);
-  return Response.json({
-    status: isHealthy ? "healthy" : "unhealthy",
-    timestamp: new Date().toISOString(),
-  }, { status: isHealthy ? 200 : 503 });
+  return Response.json(
+    {
+      status: isHealthy ? "healthy" : "unhealthy",
+      timestamp: new Date().toISOString(),
+    },
+    { status: isHealthy ? 200 : 503 }
+  );
 }
 ```
 
 ### Performance Optimizations
 
 1. **Database Indexes** (schema.sql)
+
    ```sql
    CREATE INDEX idx_customers_company ON Customers(CompanyName);
    CREATE INDEX idx_beverages_supplier ON Beverages(SupplierId);
    ```
 
 2. **Response Caching**
+
    ```typescript
    const cacheHeaders = {
      "Cache-Control": "public, max-age=3600",
-     "ETag": `"${hashContent(data)}"`,
+     ETag: `"${hashContent(data)}"`,
    };
    ```
 
@@ -210,7 +241,9 @@ if (pathname === "/health") {
    const offset = (page - 1) * pageSize;
    const { results } = await env.DB.prepare(
      "SELECT * FROM table LIMIT ? OFFSET ?"
-   ).bind(pageSize, offset).all();
+   )
+     .bind(pageSize, offset)
+     .all();
    ```
 
 ---
@@ -218,6 +251,7 @@ if (pathname === "/health") {
 ## 2. **new-mini-app-quickstart** (Farcaster Mini App)
 
 ### Project Summary
+
 - **Purpose**: Waitlist signup Mini App for Farcaster/Base ecosystem
 - **Tech Stack**: Next.js 15, React 19, TypeScript, OnchainKit, Wagmi, Viem
 - **Language Composition**: 73.3% TypeScript, 24.3% CSS, 2.4% JavaScript
@@ -226,13 +260,18 @@ if (pathname === "/health") {
 ### Key Improvements
 
 #### 1. Form Validation & Error Handling
+
 ```typescript
 // lib/validation.ts
 import { z } from "zod";
 
 export const WaitlistFormSchema = z.object({
   email: z.string().email("Invalid email address"),
-  username: z.string().min(3).max(20).regex(/^[a-zA-Z0-9_]+$/),
+  username: z
+    .string()
+    .min(3)
+    .max(20)
+    .regex(/^[a-zA-Z0-9_]+$/),
   walletAddress: z.string().startsWith("0x").length(42),
 });
 
@@ -240,6 +279,7 @@ export type WaitlistFormData = z.infer<typeof WaitlistFormSchema>;
 ```
 
 #### 2. API Route with Rate Limiting
+
 ```typescript
 // app/api/waitlist/route.ts
 import { RateLimiter } from "@/lib/rateLimit";
@@ -253,7 +293,7 @@ const limiter = new RateLimiter({
 export async function POST(request: Request) {
   try {
     const ip = request.headers.get("x-forwarded-for") || "unknown";
-    
+
     if (!limiter.isAllowed(ip)) {
       return Response.json({ error: "Too many requests" }, { status: 429 });
     }
@@ -275,10 +315,14 @@ export async function POST(request: Request) {
 ```
 
 #### 3. Web3 Error Handling
+
 ```typescript
 // lib/web3Utils.ts
 export class Web3Error extends Error {
-  constructor(public code: string, message: string) {
+  constructor(
+    public code: string,
+    message: string
+  ) {
     super(message);
     this.name = "Web3Error";
   }
@@ -293,6 +337,7 @@ export async function validateWallet(address: string): Promise<boolean> {
 ```
 
 #### 4. Environment Variable Validation
+
 ```typescript
 // lib/env.ts
 import { z } from "zod";
@@ -311,6 +356,7 @@ export const env = envSchema.parse({
 ```
 
 #### 5. Testing Setup
+
 ```typescript
 // __tests__/validation.test.ts
 import { describe, it, expect } from "vitest";
@@ -327,11 +373,13 @@ describe("WaitlistFormSchema", () => {
   });
 
   it("rejects invalid email", () => {
-    expect(() => WaitlistFormSchema.parse({
-      email: "invalid-email",
-      username: "testuser",
-      walletAddress: "0x742d35Cc6634C0532925a3b844Bc7e7595f42bE",
-    })).toThrow();
+    expect(() =>
+      WaitlistFormSchema.parse({
+        email: "invalid-email",
+        username: "testuser",
+        walletAddress: "0x742d35Cc6634C0532925a3b844Bc7e7595f42bE",
+      })
+    ).toThrow();
   });
 });
 ```
@@ -343,6 +391,7 @@ describe("WaitlistFormSchema", () => {
 ### Key Improvements
 
 #### 1. Schema Validation
+
 ```typescript
 // lib/agentsSchema.ts
 import { z } from "zod";
@@ -358,6 +407,7 @@ export type AgentsMarkdown = z.infer<typeof AgentsMarkdownSchema>;
 ```
 
 #### 2. Format Validator CLI
+
 ```typescript
 // cli/validate.ts
 import fs from "fs";
@@ -381,12 +431,14 @@ async function validateFile(filepath: string) {
 ## Cross-Repository Recommendations
 
 ### 1. Shared Utilities Pattern
+
 - Create centralized error handling
 - Share validation schemas
 - Reuse logging infrastructure
 - Share rate limiting logic
 
 ### 2. Documentation Standards
+
 ```
 ├── README.md           # Project overview
 ├── GETTING_STARTED.md # Setup instructions
@@ -397,6 +449,7 @@ async function validateFile(filepath: string) {
 ```
 
 ### 3. CI/CD Pipeline Template
+
 ```yaml
 name: CI
 on: [push, pull_request]
@@ -412,6 +465,7 @@ jobs:
 ```
 
 ### 4. Security Best Practices
+
 - Add `.env.example` files
 - Use `npm audit` in CI/CD
 - Add SECURITY.md to each repo
@@ -423,18 +477,21 @@ jobs:
 ## Implementation Priority
 
 ### Phase 1: Foundation (High Impact)
+
 1. ✅ Add Zod validation to all APIs
 2. ✅ Implement error handling standardization
 3. ✅ Add unit tests with Vitest
 4. ✅ Create CI/CD pipelines
 
 ### Phase 2: Enhancement (Medium Impact)
+
 1. Add structured logging
 2. Implement rate limiting
 3. Create shared utilities
 4. Add API documentation
 
 ### Phase 3: Polish (Nice to Have)
+
 1. Add performance monitoring
 2. Implement analytics
 3. Add E2E testing

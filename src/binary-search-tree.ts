@@ -19,7 +19,7 @@
 /**
  * TreeNode represents a single node in the binary search tree
  */
-export class TreeNode<T> {
+export class TreeNode<T extends string | number> {
   value: T;
   left: TreeNode<T> | null;
   right: TreeNode<T> | null;
@@ -34,7 +34,7 @@ export class TreeNode<T> {
 /**
  * BinarySearchTree class implementing BST operations
  */
-export class BinarySearchTree<T> {
+export class BinarySearchTree<T extends string | number> {
   root: TreeNode<T> | null;
 
   constructor() {

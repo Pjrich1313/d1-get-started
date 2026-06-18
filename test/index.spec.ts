@@ -47,7 +47,9 @@ describe("Worker with Project Name Guard", () => {
   });
 
   it("returns project name from API endpoint", async () => {
-    const request = new IncomingRequest("http://example.com/api/project-name");
+    const request = new IncomingRequest("http://example.com/api/project-name", {
+      headers: { "X-API-Key": "test-api-key-12345" },
+    });
     const ctx = createExecutionContext();
     const response = await worker.fetch(request, env, ctx);
     await waitOnExecutionContext(ctx);
@@ -57,7 +59,9 @@ describe("Worker with Project Name Guard", () => {
 
   it("returns original project name from API when guard is disabled", async () => {
     disableGuard();
-    const request = new IncomingRequest("http://example.com/api/project-name");
+    const request = new IncomingRequest("http://example.com/api/project-name", {
+      headers: { "X-API-Key": "test-api-key-12345" },
+    });
     const ctx = createExecutionContext();
     const response = await worker.fetch(request, env, ctx);
     await waitOnExecutionContext(ctx);
@@ -68,9 +72,7 @@ describe("Worker with Project Name Guard", () => {
 
 describe("Landmarks API", () => {
   it("returns unauthorized without API key (unit style)", async () => {
-    const request = new IncomingRequest(
-      "http://example.com/api/landmarks"
-    );
+    const request = new IncomingRequest("http://example.com/api/landmarks");
     const ctx = createExecutionContext();
     const mockEnv = {
       API_KEY: "test-api-key-12345",
@@ -104,9 +106,7 @@ describe("Landmarks API", () => {
       }),
     };
 
-    const request = new IncomingRequest(
-      "http://example.com/api/landmarks"
-    );
+    const request = new IncomingRequest("http://example.com/api/landmarks");
     request.headers.set("X-API-Key", "test-api-key-12345");
     const ctx = createExecutionContext();
     const mockEnv = {
@@ -132,9 +132,7 @@ describe("Landmarks API", () => {
       }),
     };
 
-    const request = new IncomingRequest(
-      "http://example.com/api/landmarks"
-    );
+    const request = new IncomingRequest("http://example.com/api/landmarks");
     request.headers.set("X-API-Key", "test-api-key-12345");
     const ctx = createExecutionContext();
     const mockEnv = {
@@ -186,9 +184,7 @@ describe("Landmarks API", () => {
       }),
     };
 
-    const request = new IncomingRequest(
-      "http://example.com/api/landmarks"
-    );
+    const request = new IncomingRequest("http://example.com/api/landmarks");
     request.headers.set("X-API-Key", "test-api-key-12345");
     const ctx = createExecutionContext();
     const mockEnv = {
