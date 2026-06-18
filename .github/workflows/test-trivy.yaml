@@ -25,7 +25,6 @@ jobs:
         with:
           scan-type: "fs"
           scan-ref: "."
-          trivy-config: trivy.yaml
           format: "sarif"
           output: "trivy-results.sarif"
           severity: "CRITICAL,HIGH"
@@ -43,7 +42,6 @@ jobs:
         with:
           scan-type: "fs"
           scan-ref: "."
-          trivy-config: trivy.yaml
           format: "table"
           severity: "CRITICAL,HIGH"
           exit-code: "1"
