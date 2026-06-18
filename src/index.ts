@@ -12,7 +12,15 @@ export default {
         );
       }
 
-      const since = searchParams.get("since") ?? "2024-01-01T00:00:00";
+      const sinceParam = searchParams.get("since");
+      const VALID_DATE_RE = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2})?$/;
+      if (sinceParam !== null && !VALID_DATE_RE.test(sinceParam)) {
+        return Response.json(
+          { error: "Invalid 'since' parameter: expected YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS" },
+          { status: 400 }
+        );
+      }
+      const since = sinceParam ?? "2024-01-01T00:00:00";
 
       try {
         const { results } = await env.DB.prepare(
