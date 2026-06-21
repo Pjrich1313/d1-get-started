@@ -127,7 +127,7 @@ const CLOCK_HTML = `<!DOCTYPE html>
 
 export default {
   async fetch(request, env): Promise<Response> {
-    const { pathname } = new URL(request.url);
+    const { pathname, searchParams } = new URL(request.url);
 
     // API key authentication for protected endpoints
     if (pathname.startsWith("/api/")) {
@@ -162,6 +162,33 @@ export default {
         console.error("Database query failed:", error);
         return Response.json(
           { error: "Failed to fetch beverages data" },
+          { status: 500 }
+        );
+      }
+    }
+
+    if (pathname === "/api/landmarks") {
+      const since = searchParams.get("since") ?? "2024-01-01T00:00:00";
+
+      try {
+        const { results } = await env.DB.prepare(
+          "SELECT id, name, location, description, created_at FROM Landmarks WHERE created_at >= ? ORDER BY created_at ASC"
+        )
+          .bind(since)
+          .all();
+
+        return Response.json(
+          { landmarks: results },
+          {
+            headers: {
+              "Cache-Control": "public, max-age=60",
+            },
+          }
+        );
+      } catch (error) {
+        console.error("Landmarks query failed:", error);
+        return Response.json(
+          { error: "Internal server error" },
           { status: 500 }
         );
       }

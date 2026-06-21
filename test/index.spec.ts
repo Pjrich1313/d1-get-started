@@ -1,70 +1,101 @@
-// test/index.spec.ts
 import {
-  createExecutionContext,
-  waitOnExecutionContext,
   SELF,
+  createExecutionContext,
+  env,
+  waitOnExecutionContext,
 } from "cloudflare:test";
-import { describe, it, expect } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import worker from "../src/index";
 
-// For now, you'll need to do something like this to get a correctly-typed
-// `Request` to pass to `worker.fetch()`.
 const IncomingRequest = Request<unknown, IncomingRequestCfProperties>;
+const TEST_API_KEY = "test-api-key-12345";
 
 describe("D1 Beverages Worker", () => {
-  it("returns unauthorized for root path (unit style)", async () => {
+  beforeAll(async () => {
+    await env.DB.exec(`
+      DROP TABLE IF EXISTS Customers;
+      CREATE TABLE Customers (
+        CustomerId INTEGER PRIMARY KEY,
+        CompanyName TEXT,
+        ContactName TEXT
+      );
+      INSERT INTO Customers (CustomerId, CompanyName, ContactName) VALUES
+        (11, 'Bs Beverages', 'Victoria Ashworth'),
+        (13, 'Bs Beverages', 'Random Name');
+
+      DROP TABLE IF EXISTS Landmarks;
+      CREATE TABLE Landmarks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        location TEXT NOT NULL,
+        description TEXT,
+        created_at TEXT NOT NULL
+      );
+      INSERT INTO Landmarks (name, location, description, created_at) VALUES
+        ('Ram Mandir', 'Ayodhya, India', 'A grand Hindu temple inaugurated in January 2024.', '2024-01-22'),
+        ('Grand Egyptian Museum', 'Giza, Egypt', 'The largest archaeological museum in the world.', '2024-06-01');
+    `);
+  });
+
+  it("returns the root help text (unit style)", async () => {
     const request = new IncomingRequest("http://example.com");
     const ctx = createExecutionContext();
     const mockEnv = {
-      API_KEY: "test-api-key-12345",
-      DB: undefined,
-    } as unknown as Env;
+      API_KEY: TEST_API_KEY,
+      DB: env.DB,
+    } as Env;
     const response = await worker.fetch(request, mockEnv, ctx);
     await waitOnExecutionContext(ctx);
 
-    expect(response.status).toBe(401);
-    await expect(response.json()).resolves.toEqual({
-      error: "Unauthorized - interaction is disabled",
-    });
+    expect(response.status).toBe(200);
+    await expect(response.text()).resolves.toContain("/api/beverages");
   });
 
-  it("returns unauthorized for root path (integration style)", async () => {
-    const response = await SELF.fetch("https://example.com");
-    expect(response.status).toBe(401);
-    await expect(response.json()).resolves.toEqual({
-      error: "Unauthorized - interaction is disabled",
-    });
-  });
-
-  it("returns unauthorized for API route with API key", async () => {
-    const response = await SELF.fetch("https://example.com/api/beverages", {
-      headers: { "X-API-Key": "test-api-key-12345" },
-    });
-
-    expect(response.status).toBe(401);
-    await expect(response.json()).resolves.toEqual({
-      error: "Unauthorized - interaction is disabled",
-    });
-  });
-
-  it("returns unauthorized for non-api routes", async () => {
+  it("returns the clock page (integration style)", async () => {
     const response = await SELF.fetch("https://example.com/clock");
 
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toContain("text/html");
+    await expect(response.text()).resolves.toContain("Digital Clock");
+  });
+
+  it("rejects beverages requests without an API key", async () => {
+    const response = await SELF.fetch("https://example.com/api/beverages");
+
     expect(response.status).toBe(401);
     await expect(response.json()).resolves.toEqual({
-      error: "Unauthorized - interaction is disabled",
+      error: "Unauthorized - Invalid or missing API key",
     });
+  });
+
+  it("returns beverage rows with a valid API key", async () => {
+    const response = await SELF.fetch("https://example.com/api/beverages", {
+      headers: { "X-API-Key": TEST_API_KEY },
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("public, max-age=60");
+    await expect(response.json()).resolves.toEqual([
+      {
+        CompanyName: "Bs Beverages",
+        ContactName: "Victoria Ashworth",
+        CustomerId: 11,
+      },
+      {
+        CompanyName: "Bs Beverages",
+        ContactName: "Random Name",
+        CustomerId: 13,
+      },
+    ]);
   });
 });
 
 describe("Landmarks API", () => {
   it("returns unauthorized without API key (unit style)", async () => {
-    const request = new IncomingRequest(
-      "http://example.com/api/landmarks"
-    );
+    const request = new IncomingRequest("http://example.com/api/landmarks");
     const ctx = createExecutionContext();
     const mockEnv = {
-      API_KEY: "test-api-key-12345",
+      API_KEY: TEST_API_KEY,
       DB: undefined,
     } as unknown as Env;
     const response = await worker.fetch(request, mockEnv, ctx);
@@ -72,7 +103,7 @@ describe("Landmarks API", () => {
 
     expect(response.status).toBe(401);
     await expect(response.json()).resolves.toEqual({
-      error: "Unauthorized - invalid or missing API key",
+      error: "Unauthorized - Invalid or missing API key",
     });
   });
 
@@ -95,41 +126,38 @@ describe("Landmarks API", () => {
       }),
     };
 
-    const request = new IncomingRequest(
-      "http://example.com/api/landmarks"
-    );
-    request.headers.set("X-API-Key", "test-api-key-12345");
+    const request = new IncomingRequest("http://example.com/api/landmarks");
+    request.headers.set("X-API-Key", TEST_API_KEY);
     const ctx = createExecutionContext();
     const mockEnv = {
-      API_KEY: "test-api-key-12345",
+      API_KEY: TEST_API_KEY,
       DB: mockDB,
     } as unknown as Env;
     const response = await worker.fetch(request, mockEnv, ctx);
     await waitOnExecutionContext(ctx);
 
     expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("public, max-age=60");
     const body = (await response.json()) as { landmarks: typeof mockResults };
     expect(body.landmarks).toEqual(mockResults);
   });
 
-  it("uses default since date of 2024-01-01 when no query param provided (unit style)", async () => {
+  it("uses the default since date when no query param is provided", async () => {
     let boundValue: string | undefined;
     const mockDB = {
       prepare: () => ({
-        bind: (val: string) => {
-          boundValue = val;
+        bind: (value: string) => {
+          boundValue = value;
           return { all: async () => ({ results: [] }) };
         },
       }),
     };
 
-    const request = new IncomingRequest(
-      "http://example.com/api/landmarks"
-    );
-    request.headers.set("X-API-Key", "test-api-key-12345");
+    const request = new IncomingRequest("http://example.com/api/landmarks");
+    request.headers.set("X-API-Key", TEST_API_KEY);
     const ctx = createExecutionContext();
     const mockEnv = {
-      API_KEY: "test-api-key-12345",
+      API_KEY: TEST_API_KEY,
       DB: mockDB,
     } as unknown as Env;
     const response = await worker.fetch(request, mockEnv, ctx);
@@ -139,12 +167,12 @@ describe("Landmarks API", () => {
     expect(boundValue).toBe("2024-01-01T00:00:00");
   });
 
-  it("accepts a custom since query parameter (unit style)", async () => {
+  it("accepts a custom since query parameter", async () => {
     let boundValue: string | undefined;
     const mockDB = {
       prepare: () => ({
-        bind: (val: string) => {
-          boundValue = val;
+        bind: (value: string) => {
+          boundValue = value;
           return { all: async () => ({ results: [] }) };
         },
       }),
@@ -153,10 +181,10 @@ describe("Landmarks API", () => {
     const request = new IncomingRequest(
       "http://example.com/api/landmarks?since=2024-06-01"
     );
-    request.headers.set("X-API-Key", "test-api-key-12345");
+    request.headers.set("X-API-Key", TEST_API_KEY);
     const ctx = createExecutionContext();
     const mockEnv = {
-      API_KEY: "test-api-key-12345",
+      API_KEY: TEST_API_KEY,
       DB: mockDB,
     } as unknown as Env;
     const response = await worker.fetch(request, mockEnv, ctx);
@@ -166,7 +194,7 @@ describe("Landmarks API", () => {
     expect(boundValue).toBe("2024-06-01");
   });
 
-  it("returns 500 on database error (unit style)", async () => {
+  it("returns 500 on database error", async () => {
     const mockDB = {
       prepare: () => ({
         bind: () => ({
@@ -177,13 +205,11 @@ describe("Landmarks API", () => {
       }),
     };
 
-    const request = new IncomingRequest(
-      "http://example.com/api/landmarks"
-    );
-    request.headers.set("X-API-Key", "test-api-key-12345");
+    const request = new IncomingRequest("http://example.com/api/landmarks");
+    request.headers.set("X-API-Key", TEST_API_KEY);
     const ctx = createExecutionContext();
     const mockEnv = {
-      API_KEY: "test-api-key-12345",
+      API_KEY: TEST_API_KEY,
       DB: mockDB,
     } as unknown as Env;
     const response = await worker.fetch(request, mockEnv, ctx);
