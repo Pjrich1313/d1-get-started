@@ -36,10 +36,7 @@ export default {
       );
     } catch (error) {
       console.error("Database query failed:", error);
-      return Response.json(
-        { error: "Internal server error" },
-        { status: 500 }
-      );
+      return Response.json({ error: "Internal server error" }, { status: 500 });
     }
   },
 } satisfies ExportedHandler<Env>;
