@@ -50,7 +50,6 @@ beforeAll(async () => {
 });
 
 describe("D1 Beverages Worker", () => {
-
   it("returns the root help text (unit style)", async () => {
     const request = new IncomingRequest("http://example.com");
     const ctx = createExecutionContext();
