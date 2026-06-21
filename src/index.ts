@@ -124,6 +124,7 @@ const CLOCK_HTML = `<!DOCTYPE html>
   </script>
 </body>
 </html>`;
+const DEFAULT_LANDMARKS_SINCE = "2024-01-01";
 
 function isValidSince(value: string): boolean {
   return (
@@ -175,7 +176,7 @@ export default {
     }
 
     if (pathname === "/api/landmarks") {
-      const since = searchParams.get("since") ?? "2024-01-01";
+      const since = searchParams.get("since") ?? DEFAULT_LANDMARKS_SINCE;
 
       if (!isValidSince(since)) {
         return Response.json(

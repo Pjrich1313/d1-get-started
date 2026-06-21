@@ -151,6 +151,29 @@ describe("Landmarks API", () => {
     expect(body.landmarks).toEqual(mockResults);
   });
 
+  it("filters landmarks in integration requests", async () => {
+    const response = await SELF.fetch(
+      "https://example.com/api/landmarks?since=2024-05-01",
+      {
+        headers: { "X-API-Key": TEST_API_KEY },
+      }
+    );
+
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as {
+      landmarks: Array<{ name: string; created_at: string }>;
+    };
+    expect(body.landmarks).toEqual([
+      {
+        id: 2,
+        name: "Grand Egyptian Museum",
+        location: "Giza, Egypt",
+        description: "The largest archaeological museum in the world.",
+        created_at: "2024-06-01",
+      },
+    ]);
+  });
+
   it("uses the default since date when no query param is provided", async () => {
     let boundValue: string | undefined;
     const mockDB = {
