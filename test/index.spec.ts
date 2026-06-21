@@ -10,41 +10,46 @@ import worker from "../src/index";
 const IncomingRequest = Request<unknown, IncomingRequestCfProperties>;
 const TEST_API_KEY = "test-api-key-12345";
 
+async function seedTestDb() {
+  await env.DB.batch([
+    env.DB.prepare(
+      "CREATE TABLE IF NOT EXISTS Customers (CustomerId INTEGER PRIMARY KEY, CompanyName TEXT, ContactName TEXT)"
+    ),
+    env.DB.prepare("DELETE FROM Customers"),
+    env.DB.prepare(
+      "INSERT INTO Customers (CustomerId, CompanyName, ContactName) VALUES (?, ?, ?)"
+    ).bind(11, "Bs Beverages", "Victoria Ashworth"),
+    env.DB.prepare(
+      "INSERT INTO Customers (CustomerId, CompanyName, ContactName) VALUES (?, ?, ?)"
+    ).bind(13, "Bs Beverages", "Random Name"),
+    env.DB.prepare(
+      "CREATE TABLE IF NOT EXISTS Landmarks (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, location TEXT NOT NULL, description TEXT, created_at TEXT NOT NULL)"
+    ),
+    env.DB.prepare("DELETE FROM Landmarks"),
+    env.DB.prepare(
+      "INSERT INTO Landmarks (name, location, description, created_at) VALUES (?, ?, ?, ?)"
+    ).bind(
+      "Ram Mandir",
+      "Ayodhya, India",
+      "A grand Hindu temple inaugurated in January 2024.",
+      "2024-01-22"
+    ),
+    env.DB.prepare(
+      "INSERT INTO Landmarks (name, location, description, created_at) VALUES (?, ?, ?, ?)"
+    ).bind(
+      "Grand Egyptian Museum",
+      "Giza, Egypt",
+      "The largest archaeological museum in the world.",
+      "2024-06-01"
+    ),
+  ]);
+}
+
+beforeAll(async () => {
+  await seedTestDb();
+});
+
 describe("D1 Beverages Worker", () => {
-  beforeAll(async () => {
-    await env.DB.batch([
-      env.DB.prepare(
-        "CREATE TABLE IF NOT EXISTS Customers (CustomerId INTEGER PRIMARY KEY, CompanyName TEXT, ContactName TEXT)"
-      ),
-      env.DB.prepare("DELETE FROM Customers"),
-      env.DB.prepare(
-        "INSERT INTO Customers (CustomerId, CompanyName, ContactName) VALUES (?, ?, ?)"
-      ).bind(11, "Bs Beverages", "Victoria Ashworth"),
-      env.DB.prepare(
-        "INSERT INTO Customers (CustomerId, CompanyName, ContactName) VALUES (?, ?, ?)"
-      ).bind(13, "Bs Beverages", "Random Name"),
-      env.DB.prepare(
-        "CREATE TABLE IF NOT EXISTS Landmarks (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, location TEXT NOT NULL, description TEXT, created_at TEXT NOT NULL)"
-      ),
-      env.DB.prepare("DELETE FROM Landmarks"),
-      env.DB.prepare(
-        "INSERT INTO Landmarks (name, location, description, created_at) VALUES (?, ?, ?, ?)"
-      ).bind(
-        "Ram Mandir",
-        "Ayodhya, India",
-        "A grand Hindu temple inaugurated in January 2024.",
-        "2024-01-22"
-      ),
-      env.DB.prepare(
-        "INSERT INTO Landmarks (name, location, description, created_at) VALUES (?, ?, ?, ?)"
-      ).bind(
-        "Grand Egyptian Museum",
-        "Giza, Egypt",
-        "The largest archaeological museum in the world.",
-        "2024-06-01"
-      ),
-    ]);
-  });
 
   it("returns the root help text (unit style)", async () => {
     const request = new IncomingRequest("http://example.com");
