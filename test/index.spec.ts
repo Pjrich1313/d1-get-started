@@ -173,7 +173,7 @@ describe("Landmarks API", () => {
     await waitOnExecutionContext(ctx);
 
     expect(response.status).toBe(200);
-    expect(boundValue).toBe("2024-01-01T00:00:00");
+    expect(boundValue).toBe("2024-01-01");
   });
 
   it("accepts a custom since query parameter", async () => {

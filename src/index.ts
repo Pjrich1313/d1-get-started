@@ -175,7 +175,7 @@ export default {
     }
 
     if (pathname === "/api/landmarks") {
-      const since = searchParams.get("since") ?? "2024-01-01T00:00:00";
+      const since = searchParams.get("since") ?? "2024-01-01";
 
       if (!isValidSince(since)) {
         return Response.json(
