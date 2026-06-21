@@ -69,7 +69,10 @@ describe("D1 Beverages Worker", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("Content-Type")).toContain("text/html");
-    await expect(response.text()).resolves.toContain("Digital Clock");
+    const body = await response.text();
+    expect(body).toContain("Digital Clock");
+    expect(body).toContain('id="clocks"');
+    expect(body).toContain("setInterval(tick, 1000)");
   });
 
   it("rejects beverages requests without an API key", async () => {

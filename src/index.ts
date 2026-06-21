@@ -127,7 +127,8 @@ const CLOCK_HTML = `<!DOCTYPE html>
 const DEFAULT_LANDMARKS_SINCE = "2024-01-01";
 
 /**
- * Accept YYYY-MM-DD and YYYY-MM-DDTHH:MM:SS values that parse as real dates.
+ * Validates YYYY-MM-DD and YYYY-MM-DDTHH:MM:SS strings and rejects values
+ * that do not parse to real calendar dates.
  */
 function isValidSince(value: string): boolean {
   return (
