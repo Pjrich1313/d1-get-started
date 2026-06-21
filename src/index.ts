@@ -125,6 +125,13 @@ const CLOCK_HTML = `<!DOCTYPE html>
 </body>
 </html>`;
 
+function isValidSince(value: string): boolean {
+  return (
+    /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2})?$/.test(value) &&
+    !Number.isNaN(Date.parse(value))
+  );
+}
+
 export default {
   async fetch(request, env): Promise<Response> {
     const { pathname, searchParams } = new URL(request.url);
@@ -169,6 +176,13 @@ export default {
 
     if (pathname === "/api/landmarks") {
       const since = searchParams.get("since") ?? "2024-01-01T00:00:00";
+
+      if (!isValidSince(since)) {
+        return Response.json(
+          { error: "Invalid since parameter" },
+          { status: 400 }
+        );
+      }
 
       try {
         const { results } = await env.DB.prepare(

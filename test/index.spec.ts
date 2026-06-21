@@ -13,20 +13,20 @@ const TEST_API_KEY = "test-api-key-12345";
 describe("D1 Beverages Worker", () => {
   beforeAll(async () => {
     await env.DB.batch([
-      env.DB.prepare("DROP TABLE IF EXISTS Customers"),
       env.DB.prepare(
-        "CREATE TABLE Customers (CustomerId INTEGER PRIMARY KEY, CompanyName TEXT, ContactName TEXT)"
+        "CREATE TABLE IF NOT EXISTS Customers (CustomerId INTEGER PRIMARY KEY, CompanyName TEXT, ContactName TEXT)"
       ),
+      env.DB.prepare("DELETE FROM Customers"),
       env.DB.prepare(
         "INSERT INTO Customers (CustomerId, CompanyName, ContactName) VALUES (?, ?, ?)"
       ).bind(11, "Bs Beverages", "Victoria Ashworth"),
       env.DB.prepare(
         "INSERT INTO Customers (CustomerId, CompanyName, ContactName) VALUES (?, ?, ?)"
       ).bind(13, "Bs Beverages", "Random Name"),
-      env.DB.prepare("DROP TABLE IF EXISTS Landmarks"),
       env.DB.prepare(
-        "CREATE TABLE Landmarks (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, location TEXT NOT NULL, description TEXT, created_at TEXT NOT NULL)"
+        "CREATE TABLE IF NOT EXISTS Landmarks (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, location TEXT NOT NULL, description TEXT, created_at TEXT NOT NULL)"
       ),
+      env.DB.prepare("DELETE FROM Landmarks"),
       env.DB.prepare(
         "INSERT INTO Landmarks (name, location, description, created_at) VALUES (?, ?, ?, ?)"
       ).bind(
@@ -201,6 +201,20 @@ describe("Landmarks API", () => {
 
     expect(response.status).toBe(200);
     expect(boundValue).toBe("2024-06-01");
+  });
+
+  it("rejects an invalid since query parameter", async () => {
+    const response = await SELF.fetch(
+      "https://example.com/api/landmarks?since=not-a-date",
+      {
+        headers: { "X-API-Key": TEST_API_KEY },
+      }
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: "Invalid since parameter",
+    });
   });
 
   it("returns 500 on database error", async () => {
