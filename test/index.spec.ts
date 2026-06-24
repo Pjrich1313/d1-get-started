@@ -1,10 +1,11 @@
 // test/index.spec.ts
 import {
+  env,
   createExecutionContext,
   waitOnExecutionContext,
   SELF,
 } from "cloudflare:test";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import worker from "../src/index";
 
 // For now, you'll need to do something like this to get a correctly-typed
@@ -193,5 +194,94 @@ describe("Landmarks API", () => {
     await expect(response.json()).resolves.toEqual({
       error: "Internal server error",
     });
+  });
+});
+
+describe("Landmarks API - integration style", () => {
+  beforeAll(async () => {
+    await env.DB.batch([
+      env.DB.prepare(
+        `CREATE TABLE IF NOT EXISTS Landmarks (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          location TEXT NOT NULL,
+          description TEXT,
+          created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )`
+      ),
+      env.DB.prepare(
+        "INSERT INTO Landmarks (name, location, description, created_at) VALUES (?, ?, ?, ?)"
+      ).bind(
+        "Grand Egyptian Museum",
+        "Giza, Egypt",
+        "The largest archaeological museum in the world.",
+        "2024-06-01"
+      ),
+      env.DB.prepare(
+        "INSERT INTO Landmarks (name, location, description, created_at) VALUES (?, ?, ?, ?)"
+      ).bind(
+        "Ram Mandir",
+        "Ayodhya, India",
+        "A grand Hindu temple inaugurated in January 2024.",
+        "2024-01-22"
+      ),
+    ]);
+  });
+
+  it("returns 401 without API key", async () => {
+    const response = await SELF.fetch("https://example.com/api/landmarks");
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({
+      error: "Unauthorized - invalid or missing API key",
+    });
+  });
+
+  it("returns all landmarks seeded from source", async () => {
+    const response = await SELF.fetch("https://example.com/api/landmarks", {
+      headers: { "X-API-Key": "test-api-key-12345" },
+    });
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as {
+      landmarks: {
+        id: number;
+        name: string;
+        location: string;
+        description: string | null;
+        created_at: string;
+      }[];
+    };
+    expect(Array.isArray(body.landmarks)).toBe(true);
+    expect(body.landmarks.length).toBe(2);
+    expect(body.landmarks.map((l) => l.name)).toContain("Grand Egyptian Museum");
+    expect(body.landmarks.map((l) => l.name)).toContain("Ram Mandir");
+  });
+
+  it("filters landmarks by since query parameter", async () => {
+    const response = await SELF.fetch(
+      "https://example.com/api/landmarks?since=2024-06-01",
+      {
+        headers: { "X-API-Key": "test-api-key-12345" },
+      }
+    );
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as {
+      landmarks: { name: string; created_at: string }[];
+    };
+    expect(body.landmarks.length).toBe(1);
+    expect(body.landmarks[0].name).toBe("Grand Egyptian Museum");
+  });
+
+  it("returns all landmarks when clock is rewound to an early since date", async () => {
+    const response = await SELF.fetch(
+      "https://example.com/api/landmarks?since=2000-01-01T00:00:00",
+      {
+        headers: { "X-API-Key": "test-api-key-12345" },
+      }
+    );
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as {
+      landmarks: { name: string; created_at: string }[];
+    };
+    expect(body.landmarks.length).toBe(2);
   });
 });
