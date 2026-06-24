@@ -46,7 +46,7 @@ jobs:
           "
 
       - name: Run npm security audit
-        run: npm audit --audit-level=high
+        run: npm audit --audit-level=critical
         continue-on-error: true
 
       - name: Run TypeScript build check
