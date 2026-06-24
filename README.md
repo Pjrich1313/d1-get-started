@@ -24,6 +24,12 @@ npm install
 npm run dev
 ```
 
+### Lint Requirements
+
+Linting and formatting dependencies are pinned in [`lint_requirements.txt`](./lint_requirements.txt). This mirrors the convention used in [coinbase/coinbase-advanced-py](https://github.com/coinbase/coinbase-advanced-py) to make lint tooling versions explicit and reproducible.
+
+The file lists the exact versions of ESLint, Prettier, and related plugins used for code quality checks.
+
 ### Validate Before Review
 
 Run these checks before opening or updating a PR:
