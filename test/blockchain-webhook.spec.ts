@@ -18,15 +18,12 @@ const samplePayload = {
 };
 
 function makeMockEnv(overrides?: Partial<Env>): Env {
+  const runFn = vi.fn().mockResolvedValue({ success: true });
+  const bindFn = vi.fn().mockReturnValue({ run: runFn });
+  const prepareFn = vi.fn().mockReturnValue({ bind: bindFn });
   return {
     API_KEY: "test-api-key-12345",
-    DB: {
-      prepare: () => ({
-        bind: () => ({
-          run: vi.fn().mockResolvedValue({ success: true }),
-        }),
-      }),
-    },
+    DB: { prepare: prepareFn } as unknown as D1Database,
     ...overrides,
   } as unknown as Env;
 }
@@ -34,6 +31,7 @@ function makeMockEnv(overrides?: Partial<Env>): Env {
 describe("Blockchain Webhook Worker", () => {
   it("stores webhook data and returns 201 on valid POST", async () => {
     const env = makeMockEnv();
+    const prepareFn = env.DB.prepare as ReturnType<typeof vi.fn>;
     const request = new IncomingRequest("http://example.com/webhook", {
       method: "POST",
       headers: {
@@ -51,6 +49,17 @@ describe("Blockchain Webhook Worker", () => {
     const body = await response.json();
     expect((body as { success: boolean }).success).toBe(true);
     expect(typeof (body as { timestamp: string }).timestamp).toBe("string");
+
+    expect(prepareFn).toHaveBeenCalledWith(
+      "INSERT INTO BlockchainWebhooks (data, timestamp) VALUES (?, ?)"
+    );
+    const bindFn = prepareFn.mock.results[0].value.bind as ReturnType<
+      typeof vi.fn
+    >;
+    expect(bindFn).toHaveBeenCalledWith(
+      JSON.stringify(samplePayload),
+      expect.any(String)
+    );
   });
 
   it("returns 401 when API key is missing", async () => {

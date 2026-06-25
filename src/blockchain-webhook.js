@@ -19,6 +19,8 @@
  * see BLOCKCHAIN_GUIDE.md in the project root.
  */
 
+import { handleWebhookRequest } from "./handle-webhook.js";
+
 export default {
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
@@ -33,36 +35,7 @@ export default {
         );
       }
 
-      // Only accept POST requests
-      if (request.method !== "POST") {
-        return Response.json({ error: "Method not allowed" }, { status: 405 });
-      }
-
-      // Parse and validate the JSON body
-      let data;
-      try {
-        data = await request.json();
-      } catch {
-        return Response.json({ error: "Invalid JSON body" }, { status: 400 });
-      }
-
-      // Store the webhook payload in D1
-      const timestamp = new Date().toISOString();
-      try {
-        await env.DB.prepare(
-          "INSERT INTO BlockchainWebhooks (data, timestamp) VALUES (?, ?)"
-        )
-          .bind(JSON.stringify(data), timestamp)
-          .run();
-      } catch (error) {
-        console.error("Database insert failed:", error);
-        return Response.json(
-          { error: "Failed to store webhook data" },
-          { status: 500 }
-        );
-      }
-
-      return Response.json({ success: true, timestamp }, { status: 201 });
+      return handleWebhookRequest(request, env);
     }
 
     return Response.json({ error: "Not found" }, { status: 404 });
