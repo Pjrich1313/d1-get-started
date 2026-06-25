@@ -20,6 +20,29 @@ export default {
       return handleWebhookRequest(request, env);
     }
 
+    if (pathname === "/api/customers") {
+      try {
+        const { results } = await env.DB.prepare(
+          "SELECT CustomerId, CompanyName, ContactName FROM Customers"
+        ).all();
+
+        return Response.json(
+          { customers: results },
+          {
+            headers: {
+              "Cache-Control": "public, max-age=60",
+            },
+          }
+        );
+      } catch (error) {
+        console.error("Database query failed:", error);
+        return Response.json(
+          { error: "Internal server error" },
+          { status: 500 }
+        );
+      }
+    }
+
     if (pathname === "/api/landmarks") {
       const since = searchParams.get("since") ?? "2024-01-01T00:00:00";
       try {

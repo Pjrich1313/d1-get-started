@@ -57,6 +57,76 @@ describe("D1 Beverages Worker", () => {
   });
 });
 
+describe("Customers API", () => {
+  it("returns unauthorized without API key (unit style)", async () => {
+    const request = new IncomingRequest("http://example.com/api/customers");
+    const ctx = createExecutionContext();
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: undefined,
+    } as unknown as Env;
+    const response = await worker.fetch(request, mockEnv, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({
+      error: "Unauthorized - invalid or missing API key",
+    });
+  });
+
+  it("returns customers from the database (unit style)", async () => {
+    const mockResults = [
+      { CustomerId: 1, CompanyName: "Alfreds Futterkiste", ContactName: "Maria Anders" },
+      { CustomerId: 11, CompanyName: "Bs Beverages", ContactName: "Victoria Ashworth" },
+    ];
+
+    const mockDB = {
+      prepare: () => ({
+        all: async () => ({ results: mockResults }),
+      }),
+    };
+
+    const request = new IncomingRequest("http://example.com/api/customers");
+    request.headers.set("X-API-Key", "test-api-key-12345");
+    const ctx = createExecutionContext();
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: mockDB,
+    } as unknown as Env;
+    const response = await worker.fetch(request, mockEnv, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as { customers: typeof mockResults };
+    expect(body.customers).toEqual(mockResults);
+  });
+
+  it("returns 500 on database error (unit style)", async () => {
+    const mockDB = {
+      prepare: () => ({
+        all: async () => {
+          throw new Error("DB connection failed");
+        },
+      }),
+    };
+
+    const request = new IncomingRequest("http://example.com/api/customers");
+    request.headers.set("X-API-Key", "test-api-key-12345");
+    const ctx = createExecutionContext();
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: mockDB,
+    } as unknown as Env;
+    const response = await worker.fetch(request, mockEnv, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toEqual({
+      error: "Internal server error",
+    });
+  });
+});
+
 describe("Landmarks API", () => {
   it("returns unauthorized without API key (unit style)", async () => {
     const request = new IncomingRequest("http://example.com/api/landmarks");
