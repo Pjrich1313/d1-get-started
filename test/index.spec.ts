@@ -191,6 +191,32 @@ describe("Customers API", () => {
     expect(boundArgs[0]).toBe(100);
   });
 
+  it("falls back to safe defaults for invalid pagination values (unit style)", async () => {
+    let boundArgs: unknown[] = [];
+    const mockDB = {
+      prepare: () => ({
+        bind: (...args: unknown[]) => {
+          boundArgs = args;
+          return { all: async () => ({ results: [] }) };
+        },
+      }),
+    };
+
+    const request = new IncomingRequest(
+      "http://example.com/api/customers?limit=abc&offset=xyz"
+    );
+    request.headers.set("X-API-Key", "test-api-key-12345");
+    const ctx = createExecutionContext();
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: mockDB,
+    } as unknown as Env;
+    await worker.fetch(request, mockEnv, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(boundArgs).toEqual([20, 0]);
+  });
+
   it("returns 500 on database error (unit style)", async () => {
     const mockDB = {
       prepare: () => ({
@@ -403,6 +429,32 @@ describe("Landmarks API", () => {
     await waitOnExecutionContext(ctx);
 
     expect(boundArgs[1]).toBe(100);
+  });
+
+  it("falls back to safe defaults for invalid pagination values (unit style)", async () => {
+    let boundArgs: unknown[] = [];
+    const mockDB = {
+      prepare: () => ({
+        bind: (...args: unknown[]) => {
+          boundArgs = args;
+          return { all: async () => ({ results: [] }) };
+        },
+      }),
+    };
+
+    const request = new IncomingRequest(
+      "http://example.com/api/landmarks?limit=abc&offset=xyz"
+    );
+    request.headers.set("X-API-Key", "test-api-key-12345");
+    const ctx = createExecutionContext();
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: mockDB,
+    } as unknown as Env;
+    await worker.fetch(request, mockEnv, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(boundArgs).toEqual(["2024-01-01T00:00:00", 20, 0]);
   });
 
   it("returns 500 on database error (unit style)", async () => {
