@@ -21,8 +21,14 @@ export default {
     }
 
     if (pathname === "/api/customers") {
-      const limit = Math.min(parseInt(searchParams.get("limit") ?? "20", 10), 100);
-      const offset = Math.max(parseInt(searchParams.get("offset") ?? "0", 10), 0);
+      const limit = Math.min(
+        parseInt(searchParams.get("limit") ?? "20", 10),
+        100
+      );
+      const offset = Math.max(
+        parseInt(searchParams.get("offset") ?? "0", 10),
+        0
+      );
       try {
         const { results } = await env.DB.prepare(
           "SELECT CustomerId, CompanyName, ContactName FROM Customers LIMIT ? OFFSET ?"
@@ -49,8 +55,14 @@ export default {
 
     if (pathname === "/api/landmarks") {
       const since = searchParams.get("since") ?? "2024-01-01T00:00:00";
-      const limit = Math.min(parseInt(searchParams.get("limit") ?? "20", 10), 100);
-      const offset = Math.max(parseInt(searchParams.get("offset") ?? "0", 10), 0);
+      const limit = Math.min(
+        parseInt(searchParams.get("limit") ?? "20", 10),
+        100
+      );
+      const offset = Math.max(
+        parseInt(searchParams.get("offset") ?? "0", 10),
+        0
+      );
       try {
         const { results } = await env.DB.prepare(
           "SELECT id, name, location, description, created_at FROM Landmarks WHERE created_at >= ? LIMIT ? OFFSET ?"
