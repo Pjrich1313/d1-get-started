@@ -10,11 +10,26 @@ export async function handleWebhookRequest(
     return Response.json({ error: "Method not allowed" }, { status: 405 });
   }
 
+  const contentType = request.headers.get("Content-Type") ?? "";
+  if (!contentType.toLowerCase().includes("application/json")) {
+    return Response.json(
+      { error: "Content-Type must be application/json" },
+      { status: 415 }
+    );
+  }
+
   let data: unknown;
   try {
     data = await request.json();
   } catch {
     return Response.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  if (typeof data !== "object" || data === null || Array.isArray(data)) {
+    return Response.json(
+      { error: "Webhook payload must be a JSON object" },
+      { status: 400 }
+    );
   }
 
   const timestamp = new Date().toISOString();

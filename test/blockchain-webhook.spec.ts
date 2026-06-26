@@ -136,6 +136,48 @@ describe("Blockchain Webhook Worker", () => {
     });
   });
 
+  it("returns 415 when Content-Type is not application/json", async () => {
+    const env = makeMockEnv();
+    const request = new IncomingRequest("http://example.com/webhook", {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain",
+        "X-API-Key": "test-api-key-12345",
+      },
+      body: JSON.stringify(samplePayload),
+    });
+
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, env, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(415);
+    await expect(response.json()).resolves.toEqual({
+      error: "Content-Type must be application/json",
+    });
+  });
+
+  it("returns 400 when payload is not a JSON object", async () => {
+    const env = makeMockEnv();
+    const request = new IncomingRequest("http://example.com/webhook", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-Key": "test-api-key-12345",
+      },
+      body: JSON.stringify(["event", "not", "object"]),
+    });
+
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, env, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: "Webhook payload must be a JSON object",
+    });
+  });
+
   it("returns 500 when database insert fails", async () => {
     const env = makeMockEnv({
       DB: {
