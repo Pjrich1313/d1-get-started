@@ -125,10 +125,16 @@ const CLOCK_HTML = `<!DOCTYPE html>
 </body>
 </html>`;
 
+declare global {
+  interface Env {
+    API_KEY?: string;
+  }
+}
+
 export default {
   async fetch(request, env): Promise<Response> {
     const { pathname } = new URL(request.url);
-    const configuredApiKey = (env as Env & { API_KEY?: string }).API_KEY;
+    const configuredApiKey = env.API_KEY;
 
     if (configuredApiKey && pathname.startsWith("/api/")) {
       const apiKey = request.headers.get("X-API-Key");
