@@ -89,10 +89,10 @@ All endpoints under `/api/` require the `X-API-Key` header. See [API_SECURITY.md
 
 Returns customers from the database. Supports pagination via `limit` and `offset` query parameters.
 
-| Parameter | Default | Max | Description |
-|-----------|---------|-----|-------------|
+| Parameter | Default | Max   | Description                 |
+| --------- | ------- | ----- | --------------------------- |
 | `limit`   | `20`    | `100` | Number of records to return |
-| `offset`  | `0`     | —   | Number of records to skip |
+| `offset`  | `0`     | —     | Number of records to skip   |
 
 **Request**
 
@@ -106,7 +106,11 @@ curl "https://<your-worker>.workers.dev/api/customers?limit=10&offset=0" \
 ```json
 {
   "customers": [
-    { "CustomerId": 1, "CompanyName": "Alfreds Futterkiste", "ContactName": "Maria Anders" }
+    {
+      "CustomerId": 1,
+      "CompanyName": "Alfreds Futterkiste",
+      "ContactName": "Maria Anders"
+    }
   ],
   "limit": 10,
   "offset": 0
@@ -117,11 +121,11 @@ curl "https://<your-worker>.workers.dev/api/customers?limit=10&offset=0" \
 
 Returns landmarks created on or after the optional `since` date (defaults to `2024-01-01T00:00:00`). Supports pagination via `limit` and `offset` query parameters.
 
-| Parameter | Default              | Max   | Description |
-|-----------|----------------------|-------|-------------|
-| `since`   | `2024-01-01T00:00:00` | —    | Filter records created on or after this date |
-| `limit`   | `20`                 | `100` | Number of records to return |
-| `offset`  | `0`                  | —    | Number of records to skip |
+| Parameter | Default               | Max   | Description                                  |
+| --------- | --------------------- | ----- | -------------------------------------------- |
+| `since`   | `2024-01-01T00:00:00` | —     | Filter records created on or after this date |
+| `limit`   | `20`                  | `100` | Number of records to return                  |
+| `offset`  | `0`                   | —     | Number of records to skip                    |
 
 **Request**
 
@@ -136,7 +140,7 @@ curl "https://<your-worker>.workers.dev/api/landmarks?since=2024-06-01&limit=5&o
 {
   "landmarks": [
     {
-      "id": 1,
+      "id": 3,
       "name": "Grand Egyptian Museum",
       "location": "Giza, Egypt",
       "description": "The largest archaeological museum in the world.",
@@ -150,7 +154,8 @@ curl "https://<your-worker>.workers.dev/api/landmarks?since=2024-06-01&limit=5&o
 
 ### POST /api/webhook
 
-Receives a JSON blockchain event and stores it in the database.
+Receives a JSON blockchain event, stores it in the database, and returns
+`201 Created` with a storage timestamp.
 
 **Request**
 
