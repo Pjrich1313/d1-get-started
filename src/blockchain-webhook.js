@@ -22,7 +22,7 @@
 import { handleWebhookRequest } from "./handle-webhook.js";
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, _ctx) {
     const { pathname } = new URL(request.url);
 
     if (pathname === "/webhook") {

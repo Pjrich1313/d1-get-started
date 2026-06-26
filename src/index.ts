@@ -1,7 +1,7 @@
 import { handleWebhookRequest } from "./handle-webhook.js";
 
 export default {
-  async fetch(request, env): Promise<Response> {
+  async fetch(request, env, _ctx): Promise<Response> {
     const { pathname, searchParams } = new URL(request.url);
 
     // API key authentication for protected endpoints
