@@ -75,9 +75,82 @@ pamela demonstrates the basics of working with Cloudflare D1 database in a Worke
 
 - **D1 Database Integration**: Store and query data using Cloudflare's D1 database
 - **API Key Authentication**: Secure API endpoints with API key authentication (see [API_SECURITY.md](./API_SECURITY.md))
+- **Customers API**: List customers stored in the D1 database
+- **Landmarks API**: Query landmark records with optional date filtering
 - **Blockchain Webhooks**: Receive and process blockchain events from Ethereum and other networks
 - **Binary Search Tree**: Example data structure implementation in TypeScript
 - **MCP Server Support**: Configured for Model Context Protocol (MCP) integration with AI tools
+
+## API Reference
+
+All endpoints under `/api/` require the `X-API-Key` header. See [API_SECURITY.md](./API_SECURITY.md) for setup instructions.
+
+### GET /api/customers
+
+Returns all customers from the database.
+
+**Request**
+
+```bash
+curl https://<your-worker>.workers.dev/api/customers \
+  -H "X-API-Key: <your-api-key>"
+```
+
+**Response**
+
+```json
+{
+  "customers": [
+    { "CustomerId": 1, "CompanyName": "Alfreds Futterkiste", "ContactName": "Maria Anders" }
+  ]
+}
+```
+
+### GET /api/landmarks
+
+Returns landmarks created on or after the optional `since` date (defaults to `2024-01-01T00:00:00`).
+
+**Request**
+
+```bash
+curl "https://<your-worker>.workers.dev/api/landmarks?since=2024-06-01" \
+  -H "X-API-Key: <your-api-key>"
+```
+
+**Response**
+
+```json
+{
+  "landmarks": [
+    {
+      "id": 1,
+      "name": "Grand Egyptian Museum",
+      "location": "Giza, Egypt",
+      "description": "The largest archaeological museum in the world.",
+      "created_at": "2024-06-01"
+    }
+  ]
+}
+```
+
+### POST /api/webhook
+
+Receives a JSON blockchain event and stores it in the database.
+
+**Request**
+
+```bash
+curl -X POST https://<your-worker>.workers.dev/api/webhook \
+  -H "X-API-Key: <your-api-key>" \
+  -H "Content-Type: application/json" \
+  -d '{"network": "ethereum", "event": "Transfer", "txHash": "0xabc..."}'
+```
+
+**Response**
+
+```json
+{ "success": true, "timestamp": "2024-06-01T12:00:00.000Z" }
+```
 
 ## Blockchain Integration
 
