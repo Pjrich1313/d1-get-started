@@ -1,5 +1,5 @@
 // test/index.spec.ts
-import { env, createExecutionContext, waitOnExecutionContext, SELF } from 'cloudflare:test';
+import { env, SELF } from 'cloudflare:test';
 import { describe, it, expect, beforeAll } from 'vitest';
 import worker from '../src/index';
 
@@ -7,11 +7,14 @@ import worker from '../src/index';
 // `Request` to pass to `worker.fetch()`.
 const IncomingRequest = Request<unknown, IncomingRequestCfProperties>;
 const TEST_API_KEY = 'test-api-key-12345';
+type BeverageRow = {
+	CustomerId: number;
+	CompanyName: string;
+	ContactName: string;
+};
 
 describe('D1 Beverages Worker', () => {
 	beforeAll(async () => {
-		(env as Env & { API_KEY?: string }).API_KEY = TEST_API_KEY;
-
 		// Initialize the database with test data
 		// Use batch for better performance with multiple inserts
 		await env.DB.exec(`DROP TABLE IF EXISTS Customers`);
@@ -28,11 +31,7 @@ describe('D1 Beverages Worker', () => {
 
 	it('responds with default message for root path (unit style)', async () => {
 		const request = new IncomingRequest('http://example.com');
-		// Create an empty context to pass to `worker.fetch()`.
-		const ctx = createExecutionContext();
-		const response = await worker.fetch(request, env, ctx);
-		// Wait for all `Promise`s passed to `ctx.waitUntil()` to settle before running test assertions
-		await waitOnExecutionContext(ctx);
+		const response = await worker.fetch(request, env);
 		expect(await response.text()).toMatchInlineSnapshot(`"Call /api/beverages to see everyone who works at Bs Beverages"`);
 	});
 
@@ -45,14 +44,12 @@ describe('D1 Beverages Worker', () => {
 		const request = new IncomingRequest('http://example.com/api/beverages', {
 			headers: { 'X-API-Key': TEST_API_KEY },
 		});
-		const ctx = createExecutionContext();
-		const response = await worker.fetch(request, env, ctx);
-		await waitOnExecutionContext(ctx);
+		const response = await worker.fetch(request, env);
 		
 		expect(response.status).toBe(200);
 		expect(response.headers.get('Cache-Control')).toBe('public, max-age=60');
 		
-		const data = await response.json();
+		const data = (await response.json()) as BeverageRow[];
 		expect(Array.isArray(data)).toBe(true);
 		expect(data.length).toBe(2);
 		expect(data[0]).toHaveProperty('CompanyName', 'Bs Beverages');
@@ -68,7 +65,7 @@ describe('D1 Beverages Worker', () => {
 		expect(response.status).toBe(200);
 		expect(response.headers.get('Cache-Control')).toBe('public, max-age=60');
 		
-		const data = await response.json();
+		const data = (await response.json()) as BeverageRow[];
 		expect(Array.isArray(data)).toBe(true);
 		expect(data.length).toBe(2);
 	});
