@@ -89,11 +89,11 @@ export default {
     }
 
     if (pathname === "/api/landmarks") {
-      const since = searchParams.get("since") ?? "2024-01-01T00:00:00";
       if (request.method !== "GET") {
         return Response.json({ error: "Method not allowed" }, { status: 405 });
       }
 
+      const since = searchParams.get("since") ?? "2024-01-01T00:00:00";
       const limit = parseBoundedPositiveInteger(
         searchParams.get("limit"),
         20,
