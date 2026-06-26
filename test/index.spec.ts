@@ -32,12 +32,12 @@ describe('D1 Beverages Worker', () => {
 	it('responds with default message for root path (unit style)', async () => {
 		const request = new IncomingRequest('http://example.com');
 		const response = await worker.fetch(request, env);
-		expect(await response.text()).toMatchInlineSnapshot(`"Call /api/beverages to see everyone who works at Bs Beverages"`);
+		expect(await response.text()).toMatchInlineSnapshot(`"Pull container from cloud"`);
 	});
 
 	it('responds with default message for root path (integration style)', async () => {
 		const response = await SELF.fetch('https://example.com');
-		expect(await response.text()).toMatchInlineSnapshot(`"Call /api/beverages to see everyone who works at Bs Beverages"`);
+		expect(await response.text()).toMatchInlineSnapshot(`"Pull container from cloud"`);
 	});
 
 	it('returns beverages data from database (unit style)', async () => {
