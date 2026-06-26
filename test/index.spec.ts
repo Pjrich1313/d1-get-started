@@ -76,8 +76,16 @@ describe("Customers API", () => {
 
   it("returns customers from the database (unit style)", async () => {
     const mockResults = [
-      { CustomerId: 1, CompanyName: "Alfreds Futterkiste", ContactName: "Maria Anders" },
-      { CustomerId: 11, CompanyName: "Bs Beverages", ContactName: "Victoria Ashworth" },
+      {
+        CustomerId: 1,
+        CompanyName: "Alfreds Futterkiste",
+        ContactName: "Maria Anders",
+      },
+      {
+        CustomerId: 11,
+        CompanyName: "Bs Beverages",
+        ContactName: "Victoria Ashworth",
+      },
     ];
 
     const mockDB = {
