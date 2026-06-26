@@ -82,7 +82,9 @@ describe("Customers API", () => {
 
     const mockDB = {
       prepare: () => ({
-        all: async () => ({ results: mockResults }),
+        bind: () => ({
+          all: async () => ({ results: mockResults }),
+        }),
       }),
     };
 
@@ -97,16 +99,106 @@ describe("Customers API", () => {
     await waitOnExecutionContext(ctx);
 
     expect(response.status).toBe(200);
-    const body = (await response.json()) as { customers: typeof mockResults };
+    const body = (await response.json()) as {
+      customers: typeof mockResults;
+      limit: number;
+      offset: number;
+    };
     expect(body.customers).toEqual(mockResults);
+  });
+
+  it("uses default limit=20 and offset=0 (unit style)", async () => {
+    let boundArgs: unknown[] = [];
+    const mockDB = {
+      prepare: () => ({
+        bind: (...args: unknown[]) => {
+          boundArgs = args;
+          return { all: async () => ({ results: [] }) };
+        },
+      }),
+    };
+
+    const request = new IncomingRequest("http://example.com/api/customers");
+    request.headers.set("X-API-Key", "test-api-key-12345");
+    const ctx = createExecutionContext();
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: mockDB,
+    } as unknown as Env;
+    const response = await worker.fetch(request, mockEnv, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(200);
+    expect(boundArgs).toEqual([20, 0]);
+    const body = (await response.json()) as { limit: number; offset: number };
+    expect(body.limit).toBe(20);
+    expect(body.offset).toBe(0);
+  });
+
+  it("respects custom limit and offset query params (unit style)", async () => {
+    let boundArgs: unknown[] = [];
+    const mockDB = {
+      prepare: () => ({
+        bind: (...args: unknown[]) => {
+          boundArgs = args;
+          return { all: async () => ({ results: [] }) };
+        },
+      }),
+    };
+
+    const request = new IncomingRequest(
+      "http://example.com/api/customers?limit=5&offset=10"
+    );
+    request.headers.set("X-API-Key", "test-api-key-12345");
+    const ctx = createExecutionContext();
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: mockDB,
+    } as unknown as Env;
+    const response = await worker.fetch(request, mockEnv, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(200);
+    expect(boundArgs).toEqual([5, 10]);
+    const body = (await response.json()) as { limit: number; offset: number };
+    expect(body.limit).toBe(5);
+    expect(body.offset).toBe(10);
+  });
+
+  it("caps limit at 100 (unit style)", async () => {
+    let boundArgs: unknown[] = [];
+    const mockDB = {
+      prepare: () => ({
+        bind: (...args: unknown[]) => {
+          boundArgs = args;
+          return { all: async () => ({ results: [] }) };
+        },
+      }),
+    };
+
+    const request = new IncomingRequest(
+      "http://example.com/api/customers?limit=9999"
+    );
+    request.headers.set("X-API-Key", "test-api-key-12345");
+    const ctx = createExecutionContext();
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: mockDB,
+    } as unknown as Env;
+    await worker.fetch(request, mockEnv, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(boundArgs[0]).toBe(100);
   });
 
   it("returns 500 on database error (unit style)", async () => {
     const mockDB = {
       prepare: () => ({
-        all: async () => {
-          throw new Error("DB connection failed");
-        },
+        bind: () => ({
+          all: async () => {
+            throw new Error("DB connection failed");
+          },
+        }),
       }),
     };
 
@@ -228,6 +320,89 @@ describe("Landmarks API", () => {
 
     expect(response.status).toBe(200);
     expect(boundValue).toBe("2024-06-01");
+  });
+
+  it("uses default limit=20 and offset=0 (unit style)", async () => {
+    let boundArgs: unknown[] = [];
+    const mockDB = {
+      prepare: () => ({
+        bind: (...args: unknown[]) => {
+          boundArgs = args;
+          return { all: async () => ({ results: [] }) };
+        },
+      }),
+    };
+
+    const request = new IncomingRequest("http://example.com/api/landmarks");
+    request.headers.set("X-API-Key", "test-api-key-12345");
+    const ctx = createExecutionContext();
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: mockDB,
+    } as unknown as Env;
+    const response = await worker.fetch(request, mockEnv, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(200);
+    expect(boundArgs[1]).toBe(20);
+    expect(boundArgs[2]).toBe(0);
+    const body = (await response.json()) as { limit: number; offset: number };
+    expect(body.limit).toBe(20);
+    expect(body.offset).toBe(0);
+  });
+
+  it("respects custom limit and offset query params (unit style)", async () => {
+    let boundArgs: unknown[] = [];
+    const mockDB = {
+      prepare: () => ({
+        bind: (...args: unknown[]) => {
+          boundArgs = args;
+          return { all: async () => ({ results: [] }) };
+        },
+      }),
+    };
+
+    const request = new IncomingRequest(
+      "http://example.com/api/landmarks?limit=3&offset=6"
+    );
+    request.headers.set("X-API-Key", "test-api-key-12345");
+    const ctx = createExecutionContext();
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: mockDB,
+    } as unknown as Env;
+    const response = await worker.fetch(request, mockEnv, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(200);
+    expect(boundArgs[1]).toBe(3);
+    expect(boundArgs[2]).toBe(6);
+  });
+
+  it("caps limit at 100 (unit style)", async () => {
+    let boundArgs: unknown[] = [];
+    const mockDB = {
+      prepare: () => ({
+        bind: (...args: unknown[]) => {
+          boundArgs = args;
+          return { all: async () => ({ results: [] }) };
+        },
+      }),
+    };
+
+    const request = new IncomingRequest(
+      "http://example.com/api/landmarks?limit=9999"
+    );
+    request.headers.set("X-API-Key", "test-api-key-12345");
+    const ctx = createExecutionContext();
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: mockDB,
+    } as unknown as Env;
+    await worker.fetch(request, mockEnv, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(boundArgs[1]).toBe(100);
   });
 
   it("returns 500 on database error (unit style)", async () => {

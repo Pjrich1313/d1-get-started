@@ -87,12 +87,17 @@ All endpoints under `/api/` require the `X-API-Key` header. See [API_SECURITY.md
 
 ### GET /api/customers
 
-Returns all customers from the database.
+Returns customers from the database. Supports pagination via `limit` and `offset` query parameters.
+
+| Parameter | Default | Max | Description |
+|-----------|---------|-----|-------------|
+| `limit`   | `20`    | `100` | Number of records to return |
+| `offset`  | `0`     | —   | Number of records to skip |
 
 **Request**
 
 ```bash
-curl https://<your-worker>.workers.dev/api/customers \
+curl "https://<your-worker>.workers.dev/api/customers?limit=10&offset=0" \
   -H "X-API-Key: <your-api-key>"
 ```
 
@@ -102,18 +107,26 @@ curl https://<your-worker>.workers.dev/api/customers \
 {
   "customers": [
     { "CustomerId": 1, "CompanyName": "Alfreds Futterkiste", "ContactName": "Maria Anders" }
-  ]
+  ],
+  "limit": 10,
+  "offset": 0
 }
 ```
 
 ### GET /api/landmarks
 
-Returns landmarks created on or after the optional `since` date (defaults to `2024-01-01T00:00:00`).
+Returns landmarks created on or after the optional `since` date (defaults to `2024-01-01T00:00:00`). Supports pagination via `limit` and `offset` query parameters.
+
+| Parameter | Default              | Max   | Description |
+|-----------|----------------------|-------|-------------|
+| `since`   | `2024-01-01T00:00:00` | —    | Filter records created on or after this date |
+| `limit`   | `20`                 | `100` | Number of records to return |
+| `offset`  | `0`                  | —    | Number of records to skip |
 
 **Request**
 
 ```bash
-curl "https://<your-worker>.workers.dev/api/landmarks?since=2024-06-01" \
+curl "https://<your-worker>.workers.dev/api/landmarks?since=2024-06-01&limit=5&offset=0" \
   -H "X-API-Key: <your-api-key>"
 ```
 
@@ -129,7 +142,9 @@ curl "https://<your-worker>.workers.dev/api/landmarks?since=2024-06-01" \
       "description": "The largest archaeological museum in the world.",
       "created_at": "2024-06-01"
     }
-  ]
+  ],
+  "limit": 5,
+  "offset": 0
 }
 ```
 
