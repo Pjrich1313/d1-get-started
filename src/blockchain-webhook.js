@@ -1,7 +1,7 @@
 /**
  * Blockchain Webhook Handler
  * Cloudflare Worker for handling blockchain webhook POST requests
- * Compatible with Wrangler 4.62.0 and Node.js 20+
+ * Compatible with Wrangler 4.105.0 and Node.js 22+
  * 
  * This webhook handler receives blockchain event notifications from services like:
  * - Alchemy (Ethereum, Polygon, etc.)

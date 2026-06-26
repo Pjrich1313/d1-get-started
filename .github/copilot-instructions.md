@@ -21,8 +21,8 @@
 - **Testing**: Vitest with @cloudflare/vitest-pool-workers
 - **Linting**: ESLint with TypeScript ESLint plugin
 - **Formatting**: Prettier
-- **Deployment**: Wrangler CLI (v4.62.0+)
-- **Node Version**: >=20.18.1
+- **Deployment**: Wrangler CLI (v4.105.0+)
+- **Node Version**: >=22.0.0
 
 ### Key Dependencies
 - `@cloudflare/workers-types` - TypeScript types for Cloudflare Workers
