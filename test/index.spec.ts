@@ -191,6 +191,55 @@ describe("Customers API", () => {
     expect(boundArgs[0]).toBe(100);
   });
 
+  it("falls back to defaults for invalid pagination params (unit style)", async () => {
+    let boundArgs: unknown[] = [];
+    const mockDB = {
+      prepare: () => ({
+        bind: (...args: unknown[]) => {
+          boundArgs = args;
+          return { all: async () => ({ results: [] }) };
+        },
+      }),
+    };
+
+    const request = new IncomingRequest(
+      "http://example.com/api/customers?limit=-5&offset=invalid"
+    );
+    request.headers.set("X-API-Key", "test-api-key-12345");
+    const ctx = createExecutionContext();
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: mockDB,
+    } as unknown as Env;
+    const response = await worker.fetch(request, mockEnv, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(200);
+    expect(boundArgs).toEqual([20, 0]);
+    const body = (await response.json()) as { limit: number; offset: number };
+    expect(body.limit).toBe(20);
+    expect(body.offset).toBe(0);
+  });
+
+  it("returns 405 for non-GET requests (unit style)", async () => {
+    const request = new IncomingRequest("http://example.com/api/customers", {
+      method: "POST",
+    });
+    request.headers.set("X-API-Key", "test-api-key-12345");
+    const ctx = createExecutionContext();
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: undefined,
+    } as unknown as Env;
+    const response = await worker.fetch(request, mockEnv, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(405);
+    await expect(response.json()).resolves.toEqual({
+      error: "Method not allowed",
+    });
+  });
+
   it("returns 500 on database error (unit style)", async () => {
     const mockDB = {
       prepare: () => ({
@@ -403,6 +452,56 @@ describe("Landmarks API", () => {
     await waitOnExecutionContext(ctx);
 
     expect(boundArgs[1]).toBe(100);
+  });
+
+  it("falls back to defaults for invalid pagination params (unit style)", async () => {
+    let boundArgs: unknown[] = [];
+    const mockDB = {
+      prepare: () => ({
+        bind: (...args: unknown[]) => {
+          boundArgs = args;
+          return { all: async () => ({ results: [] }) };
+        },
+      }),
+    };
+
+    const request = new IncomingRequest(
+      "http://example.com/api/landmarks?limit=0&offset=invalid"
+    );
+    request.headers.set("X-API-Key", "test-api-key-12345");
+    const ctx = createExecutionContext();
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: mockDB,
+    } as unknown as Env;
+    const response = await worker.fetch(request, mockEnv, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(200);
+    expect(boundArgs[1]).toBe(20);
+    expect(boundArgs[2]).toBe(0);
+    const body = (await response.json()) as { limit: number; offset: number };
+    expect(body.limit).toBe(20);
+    expect(body.offset).toBe(0);
+  });
+
+  it("returns 405 for non-GET requests (unit style)", async () => {
+    const request = new IncomingRequest("http://example.com/api/landmarks", {
+      method: "POST",
+    });
+    request.headers.set("X-API-Key", "test-api-key-12345");
+    const ctx = createExecutionContext();
+    const mockEnv = {
+      API_KEY: "test-api-key-12345",
+      DB: undefined,
+    } as unknown as Env;
+    const response = await worker.fetch(request, mockEnv, ctx);
+    await waitOnExecutionContext(ctx);
+
+    expect(response.status).toBe(405);
+    await expect(response.json()).resolves.toEqual({
+      error: "Method not allowed",
+    });
   });
 
   it("returns 500 on database error (unit style)", async () => {
