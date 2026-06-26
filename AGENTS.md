@@ -9,7 +9,7 @@
 - **Runtime**: Cloudflare Workers (edge computing)
 - **Database**: Cloudflare D1 (serverless SQLite-compatible SQL)
 - **Language**: TypeScript (strict mode)
-- **Node Version**: >=20.18.1
+- **Node Version**: >=22.0.0
 
 ## Setup
 
