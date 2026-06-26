@@ -39,22 +39,50 @@ describe("D1 Beverages Worker", () => {
   });
 
   it("responds with default message for root path (unit style)", async () => {
-    const request = new IncomingRequest("http://example.com");
+    const request = new IncomingRequest("http://example.com/");
     // Create an empty context to pass to `worker.fetch()`.
     const ctx = createExecutionContext();
     const response = await worker.fetch(request, env, ctx);
     // Wait for all `Promise`s passed to `ctx.waitUntil()` to settle before running test assertions
     await waitOnExecutionContext(ctx);
+    expect(response.status).toBe(200);
+    expect(await response.text()).toMatchInlineSnapshot(
+      `"Call /api/beverages to see everyone who works at Bs Beverages"`
+    );
+    expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
+    expect(response.headers.get("X-Frame-Options")).toBe("DENY");
+  });
+
+  it("responds with default message for root path (integration style)", async () => {
+    const response = await SELF.fetch("https://example.com/");
+    expect(response.status).toBe(200);
     expect(await response.text()).toMatchInlineSnapshot(
       `"Call /api/beverages to see everyone who works at Bs Beverages"`
     );
   });
 
-  it("responds with default message for root path (integration style)", async () => {
-    const response = await SELF.fetch("https://example.com");
-    expect(await response.text()).toMatchInlineSnapshot(
-      `"Call /api/beverages to see everyone who works at Bs Beverages"`
-    );
+  it("returns 404 JSON for unknown routes (unit style)", async () => {
+    const request = new IncomingRequest("http://example.com/unknown");
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, env, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(response.status).toBe(404);
+    const data = await response.json();
+    expect(data).toHaveProperty("error", "Not found");
+    expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
+  });
+
+  it("returns 405 for non-GET on /api/beverages (unit style)", async () => {
+    const request = new IncomingRequest("http://example.com/api/beverages", {
+      method: "POST",
+    });
+    const ctx = createExecutionContext();
+    const response = await worker.fetch(request, env, ctx);
+    await waitOnExecutionContext(ctx);
+    expect(response.status).toBe(405);
+    expect(response.headers.get("Allow")).toBe("GET");
+    const data = await response.json();
+    expect(data).toHaveProperty("error", "Method not allowed");
   });
 
   it("returns beverages data from database (unit style)", async () => {
@@ -65,6 +93,8 @@ describe("D1 Beverages Worker", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("Cache-Control")).toBe("public, max-age=60");
+    expect(response.headers.get("X-Content-Type-Options")).toBe("nosniff");
+    expect(response.headers.get("X-Frame-Options")).toBe("DENY");
 
     const data = await response.json();
     expect(Array.isArray(data)).toBe(true);
