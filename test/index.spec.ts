@@ -2,11 +2,11 @@
 import { env, SELF } from 'cloudflare:test';
 import { describe, it, expect, beforeAll } from 'vitest';
 import worker from '../src/index';
+import { TEST_API_KEY } from './constants';
 
 // For now, you'll need to do something like this to get a correctly-typed
 // `Request` to pass to `worker.fetch()`.
 const IncomingRequest = Request<unknown, IncomingRequestCfProperties>;
-const TEST_API_KEY = 'test-api-key-12345';
 type BeverageRow = {
 	CustomerId: number;
 	CompanyName: string;

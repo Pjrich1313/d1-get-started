@@ -1,6 +1,5 @@
 import { defineWorkersConfig } from '@cloudflare/vitest-pool-workers/config';
-
-const TEST_API_KEY = 'test-api-key-12345';
+import { TEST_API_KEY } from './test/constants';
 
 export default defineWorkersConfig({
 	test: {

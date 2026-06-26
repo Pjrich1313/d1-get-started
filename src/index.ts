@@ -131,6 +131,23 @@ declare global {
   }
 }
 
+function hasValidApiKey(requestApiKey: string | null, configuredApiKey: string) {
+  if (!requestApiKey) {
+    return false;
+  }
+
+  const requestBytes = new TextEncoder().encode(requestApiKey);
+  const configuredBytes = new TextEncoder().encode(configuredApiKey);
+  const maxLength = Math.max(requestBytes.length, configuredBytes.length);
+  let difference = requestBytes.length ^ configuredBytes.length;
+
+  for (let index = 0; index < maxLength; index += 1) {
+    difference |= (requestBytes[index] ?? 0) ^ (configuredBytes[index] ?? 0);
+  }
+
+  return difference === 0;
+}
+
 export default {
   async fetch(request, env): Promise<Response> {
     const { pathname } = new URL(request.url);
@@ -139,7 +156,7 @@ export default {
     if (configuredApiKey && pathname.startsWith("/api/")) {
       const apiKey = request.headers.get("X-API-Key");
 
-      if (!apiKey || apiKey !== configuredApiKey) {
+      if (!hasValidApiKey(apiKey, configuredApiKey)) {
         return Response.json(
           { error: "Unauthorized - Invalid or missing API key" },
           { status: 401 }
